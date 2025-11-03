@@ -1,11 +1,20 @@
 ---
-import Header from "../components/Header.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const pageTitle = "Projects";
+import Workpost from "../components/Navigation.astro";
+const allPosts = Object.values(
+    import.meta.glob("./posts/*.md", { eager: true }),
+);
 ---
 
-<BaseLayout>
-    <Header />
+<BaseLayout pageTitle={pageTitle}>
+    <h2>Here is a gallery of all my previous works.</h2>
+
+    <ul>
+        {
+            allPosts.map((post: any) => (
+                <Workpost url={post.url} title={post.frontmatter.title} />
+            ))
+        }
+    </ul>
 </BaseLayout>
