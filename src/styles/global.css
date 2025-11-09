@@ -98,3 +98,9 @@ html.dark {
         display: none;
     }
 }
+
+@media screen and (min-width: 636px) {
+    :root {
+        --scale: 0.85;
+    }
+}
