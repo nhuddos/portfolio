@@ -270,7 +270,7 @@ export const projects = withBase([
         summary: 'An off-the-grid tips \u2019n tricks website with a twist: it\u2019s aimed at housecats. \"Fur Away From Home\" pitches a two-month rewilding program in abandoned villages to pampered pets who are tired of being smothered with unconditional love.',
         challenge: 'A first-year brief to invent, research, design and build a tips \u2019n tricks website about going off the grid for one specific target audience. Instead of convincing people, I asked who is most over-cared-for of all: housecats.',
         approach: 'The website was more of like a burst of fun for me. The colors are vibrant, the design has to lean more towards a playful, whimsical aesthetic. I wanted users to feel the carefree, yet adorable essence of cats within the website. The illustrations are chalky and hand-drawn, giving it a unique and personal touch. I also incorporated interactive elements like a gacha slot machine to keep users engaged and entertained.',
-        outcome: 'Delivered as a live, responsive website, alongside the full process documentation \u2014 research, HMW questions and brainstorm \u2014 and presented to three separate juries covering experience design, visual design and development.',
+        outcome: 'Delivered as a live website, alongside the full process documentation \u2014 research, HMW questions and brainstorm \u2014 and presented to three separate juries covering experience design, visual design and development.',
         stack: ['Figma', 'HTML/CSS', 'JavaScript'],
         highlightTerms: [
             'off-the-grid tips \u2019n tricks website',
