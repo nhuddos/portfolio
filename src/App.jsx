@@ -5,11 +5,10 @@ import { Desktop } from './components/Desktop';
 import { CustomCursor } from './components/CustomCursor';
 
 export function App() {
-  return (<BrowserRouter>
+  return (<BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
     <DesktopProvider>
       <CustomCursor />
       <Routes>
-        {/* The desktop owns every route: it maps the URL to an open window. */}
         <Route path="*" element={<Desktop />} />
       </Routes>
     </DesktopProvider>

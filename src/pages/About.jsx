@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useScreenInit } from '../useScreenInit.js';
 import { CONTACT_LINKS, resolveLogoSrc } from '../data/contactLinks.js';
+import { asset } from '../assetUrl.js';
 
 const toolGroups = [
   {
@@ -105,13 +106,13 @@ const typingFor = (text) => Math.min(2200, Math.max(700, text.replace(/\*\*/g, '
 
 const khanhTexts = [
   "hey i'm khanh! i'm a **caffeine-driven digital designer** who loves **visual storytelling** and building immersive experiences across web, motion, and print. i'm in my 3rd year of **DEVINE** (digital design and development) at Howest.",
-  "i've always been drawn to **art in all its forms**: animation, illustration, photography, music, etc.",
+  "i've always been drawn to **art in all its forms**: animation, illustration, photography, music.",
   "but what pulled me into design was making things that look good and also work well. i love taking an idea and turning it into something people can actually interact with and enjoy. right now i'm looking for a **UI/UX or web design internship** starting **february 2027**."
 ];
 
 const roomMessages = {
   khanh: [
-    { id: 'k-photo', kind: 'photo', src: '/images/khanhdo.webp', alt: 'Khanh Do', typing: 700 },
+    { id: 'k-photo', kind: 'photo', src: asset('/images/khanhdo.webp'), alt: 'Khanh Do', typing: 700 },
     ...khanhTexts.map((text, i) => ({ id: `k-${i}`, kind: 'text', text, typing: typingFor(text) }))
   ],
   tools: toolGroups.map((group) => ({ id: `t-${group.label}`, kind: 'tools', group, typing: 900 })),

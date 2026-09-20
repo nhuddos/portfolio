@@ -1,4 +1,6 @@
-export const projects = [
+import { withBase } from '../assetUrl.js';
+
+export const projects = withBase([
     {
         slug: 'miles-and-meals',
         title: 'Miles & Meals',
@@ -312,7 +314,7 @@ export const projects = [
             }
         ]
     }
-];
+]);
 export function getProject(slug) {
     return projects.find((p) => p.slug === slug);
 }

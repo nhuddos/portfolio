@@ -15,13 +15,14 @@ import {
 } from 'lucide-react';
 import { useScreenInit } from '../useScreenInit.js';
 import { useIsNarrow } from '../useIsNarrow.js';
+import { asset } from '../assetUrl.js';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
 const TIME_BACKGROUNDS = {
-  morning: '/images/morning.gif',
-  afternoon: '/images/afternoon.gif',
-  night: '/images/night.gif'
+  morning: asset('/images/morning.gif'),
+  afternoon: asset('/images/afternoon.gif'),
+  night: asset('/images/night.gif')
 };
 
 function getTimeOfDay(date = new Date()) {
@@ -78,7 +79,7 @@ function IntroRow() {
           <ArrowRightIcon size={18} className="hidden sm:block" />
         </Link>
         <a
-          href="/KhanhDo_CV.pdf"
+          href={asset('/KhanhDo_-_CV.pdf')}
           download="Khanh_Do_CV.pdf"
           className="font-vt323 inline-flex items-center justify-center gap-2 border-2 border-ink bg-paper px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-ink shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
