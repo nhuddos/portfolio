@@ -79,7 +79,7 @@ function IntroRow() {
           <ArrowRightIcon size={18} className="hidden sm:block" />
         </Link>
         <a
-          href={asset('/KhanhDo_-_CV.pdf')}
+          href={asset('/KhanhDo_CV.pdf')}
           download="Khanh_Do_CV.pdf"
           className="font-vt323 inline-flex items-center justify-center gap-2 border-2 border-ink bg-paper px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-ink shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
