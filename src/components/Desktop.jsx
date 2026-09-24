@@ -8,7 +8,6 @@ import { useDesktop } from '../contexts/DesktopContext';
 import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
-import { PopupStorm } from './PopupStorm';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
 function getTimeOfDay(date = new Date()) {
   const hour = date.getHours();
@@ -40,8 +39,6 @@ export function Desktop() {
   const [booted, setBooted] = useState(bootedBefore);
   const [revealed, setRevealed] = useState(bootedBefore);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [popupsActive, setPopupsActive] = useState(false);
-  const endPopups = useCallback(() => setPopupsActive(false), []);
   const syncedPath = useRef('');
   const dockRef = useRef(null);
   const mobileMenuRef = useRef(null);
@@ -50,11 +47,9 @@ export function Desktop() {
     sessionStorage.setItem('nhuddos-os-booted', '1');
     setRevealed(true);
     setBooted(true);
-    setPopupsActive(true);
   }, []);
   const restart = useCallback(() => {
     sessionStorage.removeItem('nhuddos-os-booted');
-    setPopupsActive(false);
     setRevealed(false);
     setBooted(false);
   }, []);
@@ -201,7 +196,6 @@ export function Desktop() {
   </>;
   return (<div className="bg-checker relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period}>
     {!booted && <BootScreen onReveal={revealDesktop} onComplete={completeBoot} />}
-    {booted && popupsActive && <PopupStorm onDone={endPopups} />}
 
     {isNarrow ? (
       <div className="relative flex min-h-0 flex-1 flex-col">
