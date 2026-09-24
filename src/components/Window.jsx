@@ -1,270 +1,258 @@
-import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
-import { MenuIcon, XIcon, MailIcon } from 'lucide-react';
-import { CONTACT_LINKS, resolveLogoSrc } from '../data/contactLinks.js';
-import { useIsNarrow } from '../useIsNarrow.js';
-import { useDesktop } from '../contexts/DesktopContext';
-import { Window } from './Window';
-import { Taskbar } from './Taskbar';
-import { BootScreen } from './BootScreen';
-import { PopupStorm } from './PopupStorm';
-import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
-function getTimeOfDay(date = new Date()) {
-    const hour = date.getHours();
-    if (hour >= 5 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 18) return 'afternoon';
-    return 'night';
-}
-function useTimeOfDay() {
-    const [period, setPeriod] = useState(() => getTimeOfDay());
-    useEffect(() => {
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import gsap from "gsap";
+import { MinusIcon, SquareIcon, XIcon, CopyIcon } from "lucide-react";
+import { useDesktop } from "../contexts/DesktopContext";
+import { MenuBar } from "./MenuBar";
 
-        const id = setInterval(() => setPeriod(getTimeOfDay()), 60 * 1000);
-        return () => clearInterval(id);
-    }, []);
-    return period;
-}
-export function Desktop() {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const { windows, focusedId, open } = useDesktop();
-    const isNarrow = useIsNarrow();
-    const period = useTimeOfDay();
+export function Window({ win, children, isNarrow, hold = false }) {
+    const { focus, close, minimize, toggleMaximize, move, focusedId, open } = useDesktop();
+    const ref = useRef(null);
+    const flipFrom = useRef(null);
+    const prevStatus = useRef(win.status);
+    const drag = useRef(null);
+    const isFocused = focusedId === win.id;
+    const isMax = win.status === 'maximized' || isNarrow;
 
-    useEffect(() => {
-        document.documentElement.dataset.timeOfDay = period;
-    }, [period]);
+    useLayoutEffect(() => {
+        const el = ref.current;
+        if (!el || hold) return;
+        gsap.fromTo(el, {
+            opacity: 0,
+            scale: 0.9,
+            y: 16
+        }, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.28,
+            ease: 'back.out(1.6)'
+        });
+    }, [hold]);
 
-    const bootedBefore = () => typeof window !== 'undefined' && sessionStorage.getItem('nhuddos-os-booted') === '1';
-    const [booted, setBooted] = useState(bootedBefore);
-    const [revealed, setRevealed] = useState(bootedBefore);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [popupsActive, setPopupsActive] = useState(false);
-    const endPopups = useCallback(() => setPopupsActive(false), []);
-    const syncedPath = useRef('');
-    const dockRef = useRef(null);
-    const mobileMenuRef = useRef(null);
-    const revealDesktop = useCallback(() => setRevealed(true), []);
-    const completeBoot = useCallback(() => {
-        sessionStorage.setItem('nhuddos-os-booted', '1');
-        setRevealed(true);
-        setBooted(true);
-        setPopupsActive(true);
-    }, []);
-    const restart = useCallback(() => {
-        sessionStorage.removeItem('nhuddos-os-booted');
-        setPopupsActive(false);
-        setRevealed(false);
-        setBooted(false);
-    }, []);
-    /* Desktop icons cascade in once the machine finishes booting. */
-    useEffect(() => {
-        const dock = dockRef.current;
-        if (!revealed || !dock)
-            return;
-        const ctx = gsap.context(() => {
-            gsap.fromTo('[data-icon]', { opacity: 0, x: -24, scale: 0.8 }, {
-                opacity: 1,
-                x: 0,
-                scale: 1,
-                duration: 0.4,
-                ease: 'back.out(2)',
-                stagger: 0.07
-            });
-        }, dock);
-        return () => ctx.revert();
-    }, [revealed, isNarrow]);
+    useLayoutEffect(() => {
+        const el = ref.current;
+        const from = flipFrom.current;
+        flipFrom.current = null;
+        if (!el || !from) return;
+        const to = el.getBoundingClientRect();
+        if (!to.width || !to.height) return;
+        gsap.fromTo(el, {
+            x: from.left - to.left,
+            y: from.top - to.top,
+            scaleX: from.width / to.width,
+            scaleY: from.height / to.height
+        }, {
+            x: 0,
+            y: 0,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 0.3,
+            ease: 'power3.inOut',
+            transformOrigin: 'top left'
+        });
+    }, [win.status]);
 
     useEffect(() => {
-        if (!isNarrow) setMobileMenuOpen(false);
-    }, [isNarrow]);
+        const el = ref.current;
+        const was = prevStatus.current;
+        prevStatus.current = win.status;
+        if (!el || was !== 'minimized' || win.status === 'minimized') return;
+        const tab = document.getElementById(`taskbar-tab-${win.id}`);
+        const r = el.getBoundingClientRect();
+        const t = tab?.getBoundingClientRect();
+        gsap.fromTo(el, {
+            x: t ? t.left + t.width / 2 - (r.left + r.width / 2) : 0,
+            y: t ? t.top + t.height / 2 - (r.top + r.height / 2) : 220,
+            scale: 0.15,
+            opacity: 0
+        }, {
+            x: 0,
+            y: 0,
+            scale: 1,
+            opacity: 1,
+            duration: 0.34,
+            ease: 'power3.out'
+        });
+    }, [win.status, win.id]);
 
-    useEffect(() => {
-        if (!mobileMenuOpen) return;
-        const onKey = (e) => {
-            if (e.key === 'Escape') setMobileMenuOpen(false);
+    const handleMinimize = useCallback(() => {
+        const el = ref.current;
+        if (!el) return minimize(win.id);
+        const tab = document.getElementById(`taskbar-tab-${win.id}`);
+        const r = el.getBoundingClientRect();
+        const t = tab?.getBoundingClientRect();
+        gsap.to(el, {
+            x: t ? t.left + t.width / 2 - (r.left + r.width / 2) : 0,
+            y: t ? t.top + t.height / 2 - (r.top + r.height / 2) : 220,
+            scale: 0.15,
+            opacity: 0,
+            duration: 0.26,
+            ease: 'power2.in',
+            onComplete: () => {
+                gsap.set(el, {
+                    clearProps: 'transform,opacity'
+                });
+                minimize(win.id);
+            }
+        });
+    }, [minimize, win.id]);
+
+    const handleClose = useCallback(() => {
+        const el = ref.current;
+        if (!el) return close(win.id);
+        gsap.to(el, {
+            scale: 0.9,
+            opacity: 0,
+            y: 10,
+            duration: 0.18,
+            ease: 'power2.in',
+            onComplete: () => close(win.id)
+        });
+    }, [close, win.id]);
+
+    const handleMaximize = useCallback(() => {
+        flipFrom.current = ref.current?.getBoundingClientRect() ?? null;
+        toggleMaximize(win.id);
+    }, [toggleMaximize, win.id]);
+
+    const onPointerDown = (e) => {
+        focus(win.id);
+        if (isMax) return;
+        const el = ref.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        drag.current = {
+            dx: e.clientX - r.left,
+            dy: e.clientY - r.top
         };
-        window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
-    }, [mobileMenuOpen]);
-
-    useEffect(() => {
-        const grid = mobileMenuRef.current;
-        if (!mobileMenuOpen || !grid) return;
-        const ctx = gsap.context(() => {
-            gsap.fromTo('[data-tile]', { opacity: 0, y: 16, scale: 0.85 }, {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.28,
-                ease: 'back.out(1.8)',
-                stagger: 0.035
+        const onMove = (ev) => {
+            if (!drag.current) return;
+            const parent = el.offsetParent;
+            const bounds = parent?.getBoundingClientRect();
+            const originX = bounds?.left ?? 0;
+            const originY = bounds?.top ?? 0;
+            const maxX = (bounds?.width ?? window.innerWidth) - 80;
+            const maxY = (bounds?.height ?? window.innerHeight) - 40;
+            const x = Math.min(Math.max(-40, ev.clientX - originX - drag.current.dx), maxX);
+            const y = Math.min(Math.max(0, ev.clientY - originY - drag.current.dy), maxY);
+            gsap.set(el, {
+                left: x,
+                top: y
             });
-        }, grid);
-        return () => ctx.revert();
-    }, [mobileMenuOpen]);
+        };
+        const onUp = () => {
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+            if (!drag.current) return;
+            drag.current = null;
+            move(win.id, el.offsetLeft, el.offsetTop);
+        };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+    };
 
-    useEffect(() => {
-        const path = location.pathname;
-        if (path === syncedPath.current)
-            return;
-        syncedPath.current = path;
-        const match = appForPath(path);
-        if (match) {
-            open(match.id, {
-                slug: match.slug,
-                title: titleFor(match.id, match.slug),
-                size: appRegistry[match.id]?.size,
-                anchor: appRegistry[match.id]?.anchor
-            });
+    const menus = [
+        {
+            label: 'File',
+            items: [
+                { label: 'Minimize', onSelect: handleMinimize },
+                { label: isMax ? 'Restore' : 'Maximize', onSelect: handleMaximize, disabled: isNarrow },
+                { separator: true },
+                { label: 'Close', hint: 'Alt+F4', onSelect: handleClose }
+            ]
+        },
+        {
+            label: 'Edit',
+            items: [
+                { label: 'Undo', hint: 'Ctrl+Z', disabled: true },
+                { label: 'Cut', hint: 'Ctrl+X', disabled: true },
+                { label: 'Copy', hint: 'Ctrl+C', disabled: true },
+                { label: 'Paste', hint: 'Ctrl+V', disabled: true }
+            ]
+        },
+        {
+            label: 'Help',
+            items: [
+                { label: 'About Khanh Do...', onSelect: () => open('about', { title: 'About' }) },
+                { separator: true },
+                { label: 'Check for updates', hint: 'never', disabled: true }
+            ]
         }
-    }, [location.pathname, open]);
+    ];
 
-    useEffect(() => {
-        if (!focusedId)
-            return;
-        const win = windows.find((w) => w.id === focusedId);
-        if (!win || win.status === 'minimized')
-            return;
-        const route = routeFor(win.id, win.slug);
-        if (!route || route === location.pathname)
-            return;
-        syncedPath.current = route;
-        navigate(route, { replace: true });
-    }, [focusedId, windows, navigate, location.pathname]);
-    const launch = (id, el) => {
-        if (el) {
-            gsap.fromTo(el, { scale: 1 }, {
-                scale: 0.86,
-                duration: 0.09,
-                yoyo: true,
-                repeat: 1,
-                ease: 'power2.inOut'
-            });
-        }
-        open(id, { title: titleFor(id), size: appRegistry[id]?.size, anchor: appRegistry[id]?.anchor });
-    };
-    const renderMobileTile = (app) => {
-        const isRunning = windows.some((w) => w.id === app.id);
-        return (<button key={app.id} data-tile onClick={(e) => {
-            launch(app.id, e.currentTarget);
-            setMobileMenuOpen(false);
-        }} aria-label={`Open ${app.label}`} className="group flex flex-col items-center gap-2 text-center focus:outline-none">
-
-            <app.icon
-                size={64}
-                style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
-                className="[filter:drop-shadow(3px_3px_0_var(--ink))] transition-transform group-active:scale-90"
-            />
-            <span className={`px-1 font-mono text-lg leading-none group-focus-visible:bg-ink group-focus-visible:text-paper ${isRunning ? 'bg-ink text-paper' : 'text-ink'}`}>
-
-                {app.label}
-            </span>
-        </button>);
-    };
-    const renderIcon = (app) => {
-        const isRunning = windows.some((w) => w.id === app.id);
-        return (<button key={app.id} data-icon onClick={(e) => launch(app.id, e.currentTarget)} aria-label={`Open ${app.label}`} className={`group flex shrink-0 items-center gap-1.5 focus:outline-none ${isNarrow ? 'flex-row' : 'w-full flex-col text-center'}`}>
-
-            <app.icon
-                size={isNarrow ? 40 : 64}
-                style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
-                className="transition-transform [filter:drop-shadow(3px_3px_0_var(--ink))] group-hover:-translate-y-1 group-active:translate-y-0"
-            />
-            <span className={`px-1 font-mono text-lg leading-none group-focus-visible:bg-ink group-focus-visible:text-paper ${isRunning ? 'bg-ink text-paper' : 'text-ink'}`}>
-
-                {app.label}
-            </span>
-        </button>);
+    const geometry = isMax ? {
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%'
+    } : {
+        left: win.x,
+        top: win.y,
+        width: win.w,
+        height: win.h
     };
 
-    const leftApps = desktopApps.filter((app) => app.anchor !== 'right');
-    const rightApps = desktopApps.filter((app) => app.anchor === 'right');
-    const leftIcons = leftApps.map(renderIcon);
-    const rightIcons = rightApps.map(renderIcon);
-    const windowLayer = <>
+    return (
+        <section
+            ref={ref}
+            role="dialog"
+            aria-label={`${win.title} window`}
+            aria-hidden={win.status === 'minimized'}
+            onMouseDown={() => focus(win.id)}
+            style={{
+                ...geometry,
+                zIndex: win.z,
+                visibility: hold ? 'hidden' : undefined,
+                display: win.status === 'minimized' ? 'none' : 'flex'
+            }}
+            className={`absolute flex-col bevel bg-paper ${isFocused ? 'shadow-pixel-lg' : 'shadow-pixel'}`}
+        >
+            {/* Title bar */}
+            <div
+                onPointerDown={onPointerDown}
+                onDoubleClick={handleMaximize}
+                className={`flex shrink-0 items-center justify-between gap-2 px-2 py-2.5 sm:px-2.5 sm:py-2 ${isMax ? '' : 'titlebar-grab'} ${isFocused ? 'bg-ink' : 'bg-[var(--bevel-dark)]'}`}
+            >
+                <div className="flex min-w-0 items-center gap-2.5">
+                    <span className="truncate font-mono text-lg uppercase leading-none text-paper max-md:text-[24px]">
+                        {win.appId === 'project' && win.title.includes('\u203A') ?
+                            <>
+                                <Link
+                                    to="/works"
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    className="hover:text-accent-2 focus-visible:text-accent-2 focus-visible:outline-none"
+                                >
+                                    Works
+                                </Link>
+                                {' \u203A ' + win.title.split('\u203A').slice(1).join('\u203A').trim()}
+                            </> :
+                            win.title}
+                    </span>
+                </div>
 
-        {windows.map((win) => <Window key={win.id} win={win} isNarrow={isNarrow} hold={!revealed}>
-
-            <Suspense fallback={null}>
-                {appRegistry[win.appId].render(win.slug)}
-            </Suspense>
-        </Window>)}
-
-        {revealed && windows.length === 0 &&
-            <div className="flex h-full items-center justify-center">
-                <p className="bevel bg-paper/80 px-4 py-3 font-mono text-lg uppercase text-ink/70">
-                    Click a shortcut to open a window
-                </p>
-            </div>}
-    </>;
-    return (<div className="bg-checker relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period}>
-        {!booted && <BootScreen onReveal={revealDesktop} onComplete={completeBoot} />}
-        {booted && popupsActive && <PopupStorm onDone={endPopups} />}
-
-        {isNarrow ? (
-            <div className="relative flex min-h-0 flex-1 flex-col">
-                <div ref={dockRef} className="flex shrink-0 items-center justify-between gap-2 border-b-2 border-ink bg-paper px-3 py-2.5">
-                    <button data-icon onClick={() => setMobileMenuOpen(true)} aria-label="Open apps menu" aria-expanded={mobileMenuOpen} className="grid h-12 w-12 shrink-0 place-items-center bevel bg-paper text-ink active:translate-y-0.5">
-
-                        <MenuIcon size={22} strokeWidth={2.5} />
+                <div className="flex shrink-0 items-center gap-2 sm:gap-1.5">
+                    <button onClick={handleMinimize} aria-label={`Minimize ${win.title}`} className={`grid place-items-center bevel bg-lilac text-ink hover:bg-paper active:translate-y-0.5 ${isNarrow ? 'h-11 w-11 min-h-[44px] min-w-[44px]' : 'h-7 w-7 min-h-[28px] min-w-[28px]'}`}>
+                        <MinusIcon size={isNarrow ? 18 : 14} strokeWidth={3} />
                     </button>
-                    <div className="flex shrink-0 items-center gap-1.5">
-                        {CONTACT_LINKS.map((link) => (
-                            <a key={link.id} href={link.href} target="_blank" rel="noreferrer" aria-label={link.label} className="grid h-11 w-11 place-items-center border-2 border-ink bg-paper text-ink hover:bg-accent hover:text-paper">
-
-                                {link.icon === 'mail' ?
-                                    <MailIcon size={17} /> :
-                                    <img src={resolveLogoSrc(link.logo)} alt="" aria-hidden="true" className="h-4 w-4 object-contain" />}
-                            </a>
-                        ))}
-                    </div>
+                    <button onClick={handleMaximize} aria-label={win.status === 'maximized' ? `Restore ${win.title}` : `Maximize ${win.title}`} className={`grid place-items-center bevel bg-lilac text-ink hover:bg-paper active:translate-y-0.5 ${isNarrow ? 'h-11 w-11 min-h-[44px] min-w-[44px]' : 'h-7 w-7 min-h-[28px] min-w-[28px]'}`}>
+                        {win.status === 'maximized' ? <CopyIcon size={isNarrow ? 16 : 12} strokeWidth={3} /> : <SquareIcon size={isNarrow ? 16 : 12} strokeWidth={3} />}
+                    </button>
+                    <button onClick={handleClose} aria-label={`Close ${win.title}`} className={`grid place-items-center bevel bg-accent text-ink hover:bg-paper active:translate-y-0.5 ${isNarrow ? 'h-11 w-11 min-h-[44px] min-w-[44px]' : 'h-7 w-7 min-h-[28px] min-w-[28px]'}`}>
+                        <XIcon size={isNarrow ? 18 : 14} strokeWidth={3} />
+                    </button>
                 </div>
-                <div className="relative min-h-0 flex-1 p-2">
-                    <div data-window-area className="relative h-full w-full">{windowLayer}</div>
+            </div>
+
+            {/* Menu bar (desktop only: on phones the space is better spent on content) */}
+            {!isNarrow && <MenuBar menus={menus} />}
+
+            {/* Content Body */}
+            <div className="min-h-0 flex-1 p-1 bg-paper sm:p-2">
+                <div className="window-scroll bevel-in h-full overflow-y-auto bg-paper">
+                    {children}
                 </div>
-
-                {mobileMenuOpen &&
-                    <div className="bg-checker absolute inset-0 z-50 flex flex-col" onClick={(e) => {
-                        if (e.target === e.currentTarget) setMobileMenuOpen(false);
-                    }}>
-
-                        <div className="flex shrink-0 items-center justify-between border-b-2 border-ink bg-paper px-4 py-3">
-                            <span className="font-mono text-2xl text-ink">NHUDDOS&nbsp;OS</span>
-                            <button onClick={() => setMobileMenuOpen(false)} aria-label="Close apps menu" className="grid h-12 w-12 place-items-center bevel bg-paper text-ink active:translate-y-0.5">
-
-                                <XIcon size={20} strokeWidth={2.5} />
-                            </button>
-                        </div>
-                        <div ref={mobileMenuRef} className="grid flex-1 auto-rows-min grid-cols-4 gap-x-3 gap-y-8 overflow-y-auto p-5" aria-label="Apps">
-
-                            {desktopApps.map(renderMobileTile)}
-                        </div>
-                    </div>}
-            </div>) : (
-            <div className="relative min-h-0 flex-1">
-                <div ref={dockRef} className="contents">
-                    <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-28 flex-col items-center gap-9 py-6" aria-label="Desktop shortcuts">
-
-                        {leftIcons}
-                    </aside>
-
-                    {rightIcons.length > 0 &&
-                        <aside className="absolute bottom-0 right-0 top-0 z-10 flex w-28 flex-col items-center gap-9 py-6" aria-label="Desktop shortcuts (right)">
-
-                            {rightIcons}
-                        </aside>}
-                </div>
-                <div className="pointer-events-none absolute inset-0 z-20 p-3">
-                    <div data-window-area className="relative h-full w-full [&>section]:pointer-events-auto">
-                        {windowLayer}
-                    </div>
-                </div>
-            </div>)}
-
-        <Taskbar onRestart={restart} />
-
-        <div className="crt-overlay" aria-hidden="true" />
-    </div>);
+            </div>
+        </section>
+    );
 }
