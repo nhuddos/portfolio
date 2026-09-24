@@ -49,7 +49,7 @@ function unlockAudio() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
   if (!audioCtx) audioCtx = new AC();
-  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => { });
 }
 if (typeof window !== 'undefined') {
   window.addEventListener('pointerdown', unlockAudio, { capture: true });
