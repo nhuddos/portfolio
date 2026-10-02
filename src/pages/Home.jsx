@@ -65,26 +65,26 @@ function useScramble(text, duration) {
 
 function IntroRow() {
   return (
-    <div className="flex shrink-0 flex-col md:flex-row items-start md:items-center justify-between gap-6">
-      <p className="font-body max-w-md text-base leading-snug text-ink/90">
+    <div className="flex shrink-0 flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+      <p className="max-w-md text-[15px] leading-relaxed text-ink/70">
         A student designer with a passion for visual storytelling, digital design, and creating unique and immersive experiences across web, motion, and print.
       </p>
 
-      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center shrink-0">
+      <div className="flex w-full shrink-0 flex-col gap-2.5 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
         <Link
           to="/works"
-          className="font-vt323 inline-flex items-center justify-center gap-2 border-2 border-ink bg-accent px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-paper shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="group inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-[14px] font-medium text-paper transition-transform duration-300 ease-out-expo hover:-translate-y-0.5 active:translate-y-0"
         >
-          SEE MY WORK <ArrowRightIcon size={20} className="sm:hidden" />
-          <ArrowRightIcon size={18} className="hidden sm:block" />
+          See my work
+          <ArrowRightIcon size={16} strokeWidth={2} className="transition-transform duration-300 ease-out-expo group-hover:translate-x-0.5" />
         </Link>
         <a
           href={asset('/KhanhDo_CV.pdf')}
           download="Khanh_Do_CV.pdf"
-          className="font-vt323 inline-flex items-center justify-center gap-2 border-2 border-ink bg-paper px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-ink shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+          className="group inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 px-5 py-3 text-[14px] font-medium text-ink transition-colors hover:border-ink/40"
         >
-          DOWNLOAD RESUME <ArrowDownIcon size={20} className="sm:hidden" />
-          <ArrowDownIcon size={18} className="hidden sm:block" />
+          Download resume
+          <ArrowDownIcon size={16} strokeWidth={2} className="transition-transform duration-300 ease-out-expo group-hover:translate-y-0.5" />
         </a>
       </div>
     </div>
@@ -93,76 +93,66 @@ function IntroRow() {
 
 function WallpaperCutout({ timeBg }) {
   return (
-    <div className="relative w-full flex-1 min-h-[90px] max-h-[220px] sm:max-h-[280px] md:max-h-[320px] mt-auto">
-      <svg width="0" height="0" className="absolute pointer-events-none">
-        <defs>
-          <clipPath id="bottomNotchedClip" clipPathUnits="objectBoundingBox">
-            <path d="M 0.04,0 L 0.96,0 L 0.96,0.25 L 1,0.25 L 1,0.75 L 0.96,0.75 L 0.96,1 L 0.04,1 L 0.04,0.75 L 0,0.75 L 0,0.25 L 0.04,0.25 Z" />
-          </clipPath>
-        </defs>
-      </svg>
-
-      <div className="w-full h-full relative" style={{ clipPath: 'url(#bottomNotchedClip)' }}>
-        <div
-          className="w-full h-full"
-          style={{
-            backgroundImage: `url("${timeBg}")`,
-            backgroundAttachment: 'fixed',
-            backgroundPosition: 'center center',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-            imageRendering: 'pixelated'
-          }}
-        />
-      </div>
-
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox="0 0 1000 300"
-        preserveAspectRatio="none"
-      >
-        <path
-          fill="none"
-          stroke="var(--ink)"
-          strokeWidth="4"
-          vectorEffect="non-scaling-stroke"
-          d="M 40,0 L 960,0 L 960,75 L 1000,75 L 1000,225 L 960,225 L 960,300 L 40,300 L 40,225 L 0,225 L 0,75 L 40,75 Z"
-        />
-      </svg>
+    <div className="relative mt-auto min-h-[90px] w-full max-h-[220px] flex-1 overflow-hidden rounded-2xl border border-ink/10 sm:max-h-[280px] md:max-h-[320px]">
+      <div
+        className="pixelated h-full w-full"
+        style={{
+          backgroundImage: `url("${timeBg}")`,
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      <span className="eyebrow absolute bottom-3 left-3 rounded-full bg-paper/80 px-2.5 py-1.5 text-ink/70 backdrop-blur">
+        Live view
+      </span>
     </div>
+  );
+}
+
+/* Figma-style selection frame around a word: hairline box + corner handles. */
+function SelectionFrame({ color, children, ...rest }) {
+  return (
+    <span className="relative inline-block px-3 py-1 lg:px-5" {...rest}>
+      <span className="pointer-events-none absolute inset-0 border" style={{ borderColor: color }} />
+      {['-top-[4px] -left-[4px]', '-top-[4px] -right-[4px]', '-bottom-[4px] -left-[4px]', '-bottom-[4px] -right-[4px]'].map((pos) => (
+        <span
+          key={pos}
+          className={`pointer-events-none absolute ${pos} h-2 w-2 border bg-paper`}
+          style={{ borderColor: color }}
+        />
+      ))}
+      {children}
+    </span>
   );
 }
 
 function HomeMobile() {
   const timeBg = useTimeBackground();
-  const [visualRef, scrambleVisual] = useScramble('VISUAL', 0.5);
-  const [designerRef, scrambleDesigner] = useScramble('DESIGNER', 0.55);
+  const [visualRef, scrambleVisual] = useScramble('Visual', 0.5);
+  const [designerRef, scrambleDesigner] = useScramble('Designer', 0.55);
 
   return (
-    <div className="w-full h-full min-h-0 bg-paper flex flex-col justify-between p-6 sm:p-8 gap-6 font-vt323 overflow-hidden">
-      <h1 className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-3 text-center w-full">
-        <span ref={visualRef} onMouseEnter={scrambleVisual} className="font-handjet font-black w-full sm:w-auto text-[24vw] sm:text-[80px] md:text-[110px] lg:text-[165px] leading-[0.85] tracking-tight text-ink select-none">
-          VISUAL
+    <div className="flex h-full min-h-0 w-full flex-col justify-between gap-6 overflow-hidden bg-paper p-6 sm:p-8">
+      <p className="eyebrow text-ink/50">Khanh Do &mdash; Portfolio</p>
+      <h1 className="flex w-full shrink-0 flex-col items-start gap-1">
+        <span ref={visualRef} onMouseEnter={scrambleVisual} className="select-none font-display text-[22vw] italic leading-[0.9] text-ink sm:text-[110px]">
+          Visual
         </span>
 
-        <span className="relative inline-block px-3 sm:px-6 py-1 my-1">
-          <span className="absolute inset-0 border-2 border-accent pointer-events-none" />
-          <span className="absolute -top-1.5 -left-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-          <span className="absolute -bottom-1.5 -left-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-          <span className="absolute -bottom-1.5 -right-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-
+        <SelectionFrame color="var(--accent)">
           <motion.span
             ref={designerRef}
             onMouseEnter={scrambleDesigner}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.05 }}
-            className="font-handjet font-black text-[24vw] sm:text-[80px] md:text-[110px] lg:text-[165px] leading-[0.85] tracking-tight text-accent select-none block"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="block select-none text-[16vw] font-semibold leading-[0.95] tracking-[-0.04em] text-accent sm:text-[90px]"
           >
-            DESIGNER
+            Designer
           </motion.span>
-        </span>
+        </SelectionFrame>
       </h1>
 
       <IntroRow />
@@ -176,18 +166,19 @@ const TOOLS = [
   { id: 'pencil', label: 'Pencil', icon: PencilIcon, hint: 'Drag on the canvas to draw. The line-size box sets the width.' },
   { id: 'brush', label: 'Brush', icon: BrushIcon, hint: 'A chunkier brush. Drag on the canvas.' },
   { id: 'eraser', label: 'Eraser', icon: EraserIcon, hint: 'Drag to rub out your scribbles.' },
-  { id: 'fill', label: 'Fill', icon: PaintBucketIcon, hint: 'Click VISUAL or DESIGNER to fill it with the current colour.' },
-  { id: 'picker', label: 'Colour picker', icon: PipetteIcon, hint: 'Click VISUAL or DESIGNER to pick up its colour.' }
+  { id: 'fill', label: 'Fill', icon: PaintBucketIcon, hint: 'Click “Visual” or “Designer” to fill it with the current colour.' },
+  { id: 'picker', label: 'Colour picker', icon: PipetteIcon, hint: 'Click “Visual” or “Designer” to pick up its colour.' }
 ];
 
 const PALETTE = [
-  'var(--ink)', 'var(--bevel-dark)', 'var(--muted)', 'var(--lilac)', 'var(--mint)', 'var(--sky)',
-  'var(--accent)', 'var(--accent-2)', 'var(--paper)', '#ffffff', '#e0526b', '#8b5cf6'
+  'var(--ink)', 'var(--muted)', 'var(--lilac)', 'var(--mint)', 'var(--sky)',
+  'var(--accent)', 'var(--accent-2)', 'var(--paper)', '#e0526b', '#8b5cf6'
 ];
 
 const DEFAULT_WORD_COLOR = { visual: 'var(--ink)', designer: 'var(--accent)' };
 
-const CELL = 4;
+/* Stroke width (CSS px) per line-size step, per tool. */
+const STROKE = { pencil: 2, brush: 7, eraser: 12 };
 
 function resolveColor(el, value) {
   if (!value.startsWith('var(')) return value;
@@ -210,8 +201,8 @@ function SessionTimer() {
 
 function HomePaint() {
   const timeBg = useTimeBackground();
-  const [visualRef, scrambleVisual] = useScramble('VISUAL', 0.5);
-  const [designerRef, scrambleDesigner] = useScramble('DESIGNER', 0.55);
+  const [visualRef, scrambleVisual] = useScramble('Visual', 0.5);
+  const [designerRef, scrambleDesigner] = useScramble('Designer', 0.55);
 
   const [tool, setTool] = useState('select');
   const [color, setColor] = useState('var(--accent)');
@@ -235,8 +226,9 @@ function HomePaint() {
     const cv = canvasRef.current;
     if (!sheet || !cv) return undefined;
     const ro = new ResizeObserver((entries) => {
-      const w = Math.round(entries[0].contentRect.width);
-      const h = Math.round(entries[0].contentRect.height);
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(entries[0].contentRect.width * dpr);
+      const h = Math.round(entries[0].contentRect.height * dpr);
       if (!w || !h || (cv.width === w && cv.height === h)) return;
       const copy = document.createElement('canvas');
       copy.width = cv.width;
@@ -251,12 +243,6 @@ function HomePaint() {
     return () => ro.disconnect();
   }, []);
 
-  const cellsForTool = () => {
-    if (tool === 'brush') return lineSize * 2;
-    if (tool === 'eraser') return lineSize * 3;
-    return lineSize;
-  };
-
   const pointFor = (e) => {
     const cv = canvasRef.current;
     const r = cv.getBoundingClientRect();
@@ -266,30 +252,25 @@ function HomePaint() {
     };
   };
 
-  const stamp = (x, y) => {
+  /* Smooth, round-capped strokes; the eraser cuts through with destination-out. */
+  const strokeTo = (from, to) => {
     const cv = canvasRef.current;
     const ctx = cv.getContext('2d');
-    const cells = cellsForTool();
-    const size = cells * CELL;
-    const offset = Math.floor((cells - 1) / 2) * CELL;
-    const gx = Math.floor(x / CELL) * CELL - offset;
-    const gy = Math.floor(y / CELL) * CELL - offset;
-    if (tool === 'eraser') {
-      ctx.clearRect(gx, gy, size, size);
-    } else {
-      ctx.fillStyle = resolveColor(cv, color);
-      ctx.fillRect(gx, gy, size, size);
-    }
+    const dpr = cv.width / cv.getBoundingClientRect().width || 1;
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = STROKE[tool] * lineSize * dpr;
+    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = tool === 'eraser' ? '#000' : resolveColor(cv, color);
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x + 0.01, to.y);
+    ctx.stroke();
+    ctx.restore();
   };
 
-  const strokeTo = (from, to) => {
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const steps = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / CELL));
-    for (let i = 0; i <= steps; i += 1) {
-      stamp(from.x + (dx * i) / steps, from.y + (dy * i) / steps);
-    }
-  };
+  const stamp = (x, y) => strokeTo({ x, y }, { x, y });
 
   const onCanvasDown = (e) => {
     if (!isDrawTool) return;
@@ -341,13 +322,13 @@ function HomePaint() {
   const ToolIcon = activeTool.icon;
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-paper font-vt323">
-      <div className="flex min-h-0 flex-1">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-ink/[0.03]">
+      <div className="flex min-h-0 flex-1 gap-3 p-3">
         <aside
-          className="flex w-[76px] shrink-0 flex-col gap-4 overflow-y-auto border-r-2 border-ink bg-paper p-2"
+          className="flex w-11 shrink-0 flex-col items-center gap-3 overflow-y-auto rounded-2xl border border-ink/[0.08] bg-paper py-2 shadow-soft"
           aria-label="Tools"
         >
-          <div className="grid grid-cols-2 gap-1.5" role="toolbar" aria-label="Drawing tools">
+          <div className="flex flex-col gap-1" role="toolbar" aria-label="Drawing tools">
             {TOOLS.map((t) => {
               const Icon = t.icon;
               const active = t.id === tool;
@@ -359,18 +340,20 @@ function HomePaint() {
                   aria-label={t.label}
                   aria-pressed={active}
                   title={t.label}
-                  className={`grid h-8 w-8 place-items-center border-2 border-ink text-ink transition-transform duration-75 ${active
-                    ? 'translate-x-[2px] translate-y-[2px] bg-accent-2'
-                    : 'bg-paper shadow-[2px_2px_0_0_var(--ink)] hover:bg-accent-2/40'
+                  className={`grid h-8 w-8 place-items-center rounded-lg transition-colors ${active
+                    ? 'bg-accent text-on-accent'
+                    : 'text-ink/60 hover:bg-ink/5 hover:text-ink'
                     }`}
                 >
-                  <Icon size={16} strokeWidth={2.5} />
+                  <Icon size={16} strokeWidth={1.75} />
                 </button>
               );
             })}
           </div>
 
-          <div className="border-2 border-ink" role="group" aria-label="Line size">
+          <div className="h-px w-6 bg-ink/10" aria-hidden />
+
+          <div className="flex flex-col gap-1" role="group" aria-label="Line size">
             {[1, 2, 3, 4].map((n) => (
               <button
                 key={n}
@@ -378,85 +361,79 @@ function HomePaint() {
                 onClick={() => setLineSize(n)}
                 aria-label={`Line size ${n}`}
                 aria-pressed={lineSize === n}
-                className={`flex h-6 w-full items-center px-1.5 ${lineSize === n ? 'bg-accent-2' : 'bg-paper hover:bg-accent-2/40'}`}
+                className={`grid h-7 w-8 place-items-center rounded-lg ${lineSize === n ? 'bg-ink/10' : 'hover:bg-ink/5'}`}
               >
-                <span className="block w-full bg-ink" style={{ height: n * 2 }} />
+                <span className="block rounded-full bg-ink" style={{ height: n * 2, width: 16 }} />
               </button>
             ))}
           </div>
         </aside>
 
-        <div className="min-h-0 min-w-0 flex-1 bg-ink/10 p-3">
-          <div
-            ref={sheetRef}
-            onPointerMove={onSheetMove}
-            onPointerLeave={onSheetLeave}
-            style={{ containerType: 'inline-size' }}
-            className="relative flex h-full min-h-0 flex-col justify-between gap-4 overflow-hidden border-2 border-ink bg-paper p-5 shadow-pixel lg:p-6"
+        <div
+          ref={sheetRef}
+          onPointerMove={onSheetMove}
+          onPointerLeave={onSheetLeave}
+          style={{ containerType: 'inline-size' }}
+          className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col justify-between gap-5 overflow-hidden rounded-2xl border border-ink/[0.08] bg-paper p-6 shadow-soft lg:p-8"
+        >
+          <p className="eyebrow flex shrink-0 items-center justify-between text-ink/45">
+            <span>Khanh Do &mdash; Portfolio</span>
+            <span ref={coordRef} className="tabular-nums">X -  Y -</span>
+          </p>
+
+          <h1
+            className="flex w-full shrink-0 flex-wrap items-baseline justify-center text-center"
+            style={{ gap: '0.5rem 2.5cqw' }}
           >
-            <h1
-              className="flex w-full shrink-0 flex-wrap items-center justify-center text-center"
-              style={{ gap: '0.5rem 2cqw' }}
+            <span
+              ref={visualRef}
+              onMouseEnter={scrambleVisual}
+              onClick={() => onWordClick('visual')}
+              className="select-none font-display italic leading-[0.9]"
+              style={{ fontSize: 'min(14cqw, 170px)', color: wordColor('visual'), cursor: wordCursor }}
             >
-              <span
-                ref={visualRef}
-                onMouseEnter={scrambleVisual}
-                onClick={() => onWordClick('visual')}
-                className="font-handjet font-black leading-[0.85] tracking-tight select-none"
-                style={{ fontSize: 'min(15cqw, 165px)', color: wordColor('visual'), cursor: wordCursor }}
+              Visual
+            </span>
+
+            <SelectionFrame
+              color={wordColor('designer')}
+              style={{ cursor: wordCursor }}
+              onClick={() => onWordClick('designer')}
+            >
+              <motion.span
+                ref={designerRef}
+                onMouseEnter={scrambleDesigner}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                className="block select-none font-semibold leading-[0.95] tracking-[-0.045em]"
+                style={{ fontSize: 'min(11.5cqw, 140px)', color: wordColor('designer') }}
               >
-                VISUAL
-              </span>
+                Designer
+              </motion.span>
+            </SelectionFrame>
+          </h1>
 
-              <span
-                className="relative inline-block px-3 py-1 lg:px-6"
-                style={{ cursor: wordCursor }}
-                onClick={() => onWordClick('designer')}
-              >
-                <span className="pointer-events-none absolute inset-0 border-2" style={{ borderColor: wordColor('designer') }} />
-                {['-top-1.5 -left-1.5', '-top-1.5 -right-1.5', '-bottom-1.5 -left-1.5', '-bottom-1.5 -right-1.5'].map((pos) => (
-                  <span
-                    key={pos}
-                    className={`pointer-events-none absolute ${pos} h-3 w-3 border-2 bg-paper`}
-                    style={{ borderColor: wordColor('designer') }}
-                  />
-                ))}
+          <IntroRow />
+          <WallpaperCutout timeBg={timeBg} />
 
-                <motion.span
-                  ref={designerRef}
-                  onMouseEnter={scrambleDesigner}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.05 }}
-                  className="block font-handjet font-black leading-[0.85] tracking-tight select-none"
-                  style={{ fontSize: 'min(15cqw, 165px)', color: wordColor('designer') }}
-                >
-                  DESIGNER
-                </motion.span>
-              </span>
-            </h1>
-
-            <IntroRow />
-            <WallpaperCutout timeBg={timeBg} />
-
-            <canvas
-              ref={canvasRef}
-              aria-hidden="true"
-              onPointerDown={onCanvasDown}
-              onPointerMove={onCanvasMove}
-              onPointerUp={endStroke}
-              onPointerCancel={endStroke}
-              className={`absolute inset-0 z-10 h-full w-full touch-none ${isDrawTool ? 'cursor-crosshair' : 'pointer-events-none'}`}
-            />
-          </div>
+          <canvas
+            ref={canvasRef}
+            aria-hidden="true"
+            onPointerDown={onCanvasDown}
+            onPointerMove={onCanvasMove}
+            onPointerUp={endStroke}
+            onPointerCancel={endStroke}
+            className={`absolute inset-0 z-10 h-full w-full touch-none ${isDrawTool ? 'cursor-crosshair' : 'pointer-events-none'}`}
+          />
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3 border-t-2 border-ink bg-paper px-3 py-1.5">
-        <span className="grid h-9 w-9 shrink-0 place-items-center bevel-in bg-paper" role="img" aria-label="Current colour">
-          <span className="block h-full w-full" style={{ background: color }} />
+      <div className="flex shrink-0 items-center gap-4 px-4 pb-3">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-ink/15 p-0.5" role="img" aria-label="Current colour">
+          <span className="block h-full w-full rounded-full" style={{ background: color }} />
         </span>
-        <div className="grid grid-flow-col grid-rows-2 gap-1" role="group" aria-label="Colour palette">
+        <div className="flex items-center gap-1.5" role="group" aria-label="Colour palette">
           {PALETTE.map((c, i) => (
             <button
               key={c}
@@ -464,11 +441,26 @@ function HomePaint() {
               onClick={() => setColor(c)}
               aria-label={`Colour ${i + 1}`}
               aria-pressed={color === c}
-              className={`h-[18px] w-[18px] border-2 ${color === c ? 'border-ink ring-2 ring-accent' : 'border-ink/60 hover:border-ink'}`}
+              className={`h-[18px] w-[18px] rounded-full border border-ink/15 transition-transform hover:scale-110 ${color === c ? 'ring-2 ring-ink/70 ring-offset-2 ring-offset-paper' : ''}`}
               style={{ background: c }}
             />
           ))}
         </div>
+
+        <p className="hidden min-w-0 flex-1 items-center gap-2 truncate text-[12px] text-ink/50 lg:flex">
+          <ToolIcon size={13} strokeWidth={1.75} className="shrink-0" />
+          <span className="truncate">{activeTool.hint}</span>
+        </p>
+
+        {dirty && (
+          <button
+            type="button"
+            onClick={clearCanvas}
+            className="ml-auto shrink-0 rounded-full border border-ink/15 px-3 py-1 text-[12px] text-ink/70 hover:border-ink/40 hover:text-ink"
+          >
+            Clear canvas
+          </button>
+        )}
       </div>
     </div>
   );

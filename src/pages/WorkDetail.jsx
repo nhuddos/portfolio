@@ -36,19 +36,20 @@ function Highlighted({ text, terms }) {
   const parts = text.split(pattern);
   return (<>
     {parts.map((part, i) => terms.some((t) => t.toLowerCase() === part.toLowerCase()) ?
-      <mark key={i} className="bg-accent-2 px-1 text-ink">{part}</mark> :
+      <mark key={i} className="rounded bg-accent-2/45 px-1 text-ink">{part}</mark> :
       <React.Fragment key={i}>{part}</React.Fragment>)}
   </>);
 }
 
 function ProjectImage({ image, className = '' }) {
-  return (<motion.figure initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.4 }} className={className}>
-    <img src={image.url} alt={image.caption} loading="lazy" className="pixelated w-full object-cover" />
+  return (<motion.figure initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className={className}>
+    <img src={image.url} alt={image.caption} loading="lazy" className="w-full rounded-2xl border border-ink/[0.06] object-cover" />
+    {image.caption && <figcaption className="mt-3 max-w-xl text-[13px] leading-relaxed text-ink/50">{image.caption}</figcaption>}
   </motion.figure>);
 }
 
 function BigButton({ href, to, tone = 'solid', children }) {
-  const cls = `font-vt323 inline-flex items-center justify-center gap-2 border-2 border-ink px-6 py-4 text-xl sm:px-5 sm:py-2.5 font-bold uppercase tracking-wide shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${tone === 'solid' ? 'bg-accent text-paper' : 'bg-paper text-ink'}`;
+  const cls = `inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-[14px] font-medium transition-all duration-300 ease-out-expo hover:-translate-y-0.5 active:translate-y-0 ${tone === 'solid' ? 'bg-ink text-paper' : 'border border-ink/15 text-ink hover:border-ink/40'}`;
   if (to) {
     return <Link to={to} className={cls}>{children}</Link>;
   }
@@ -148,11 +149,11 @@ export function WorkDetail({ slug: slugProp } = {}) {
   useEffect(() => {
     if (!project || !rootRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo('[data-reveal]', { opacity: 0, y: 18 }, {
+      gsap.fromTo('[data-reveal]', { opacity: 0, y: 24 }, {
         opacity: 1,
         y: 0,
-        duration: 0.5,
-        ease: 'power3.out',
+        duration: 0.9,
+        ease: 'expo.out',
         stagger: 0.08
       });
     }, rootRef);
@@ -171,8 +172,8 @@ export function WorkDetail({ slug: slugProp } = {}) {
 
   if (!project) {
     return (<div className="mx-auto flex w-full max-w-3xl flex-col items-center px-5 py-24 text-center">
-      <h1 className="font-mono text-xl">Project not found</h1>
-      <p className="font-body mt-4 text-[20px] text-ink/60">
+      <h1 className="font-display text-5xl italic">Project not found</h1>
+      <p className="mt-4 text-[15px] text-ink/60">
         This work may have been moved or retired.
       </p>
       <div className="mt-8">
@@ -184,19 +185,20 @@ export function WorkDetail({ slug: slugProp } = {}) {
   }
 
   return (<div ref={rootRef} className="w-full">
-    <div className="sticky top-0 z-30 h-1 w-full bg-ink/10">
+    <div className="sticky top-0 z-30 h-0.5 w-full bg-ink/[0.06]">
       <div ref={progressFillRef} className="h-full w-full origin-left scale-x-0 bg-accent" />
     </div>
 
     <section
-      className={`flex flex-col justify-center border-b-3 border-ink px-8 py-14 ${project.heroImage ? 'md:flex-row md:items-center md:gap-14' : ''}`}
+      className={`flex flex-col justify-center border-b border-ink/[0.08] px-6 py-14 sm:px-10 ${project.heroImage ? 'md:flex-row md:items-center md:gap-14' : ''}`}
       style={{ minHeight: heroHeight ? `${heroHeight}px` : '100%' }}
     >
       <div className={project.heroImage ? 'md:flex-1' : ''}>
-        <p data-reveal className="font-mono text-lg uppercase text-accent">
-          {project.category} <span className="text-ink/40">&middot; {project.year}</span>
+        <p data-reveal className="eyebrow flex items-center gap-2 text-ink/50">
+          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+          {project.category} <span className="text-ink/30">/</span> {project.year}
         </p>
-        <h1 data-reveal className="mt-2 font-mono text-3xl leading-[1.4] sm:text-4xl">
+        <h1 data-reveal className="mt-4 font-display text-5xl italic leading-[0.95] tracking-[-0.01em] sm:text-6xl lg:text-7xl">
           {project.title}
         </h1>
 
@@ -206,16 +208,16 @@ export function WorkDetail({ slug: slugProp } = {}) {
               src={project.heroImage}
               alt={project.title}
               loading="lazy"
-              className="pixelated mx-auto max-h-80 w-full object-contain"
+              className="mx-auto max-h-80 w-full object-contain"
             />
           </div>}
 
-        <p data-reveal className="font-body mt-6 max-w-2xl text-[20px] leading-relaxed text-ink/75">
+        <p data-reveal className="mt-6 max-w-xl text-[16px] leading-relaxed text-ink/70">
           <Highlighted text={project.summary} terms={project.highlightTerms} />
         </p>
 
         <div data-reveal className="mt-6 flex flex-wrap gap-2">
-          {project.stack.map((tool) => <span key={tool} className="border-3 border-ink px-3 py-2 font-mono text-base max-md:text-[18px] uppercase">
+          {project.stack.map((tool) => <span key={tool} className="rounded-full border border-ink/10 px-3 py-1.5 font-mono text-[11px] text-ink/70">
             {tool}
           </span>)}
         </div>
@@ -241,14 +243,14 @@ export function WorkDetail({ slug: slugProp } = {}) {
             src={project.heroImage}
             alt={project.title}
             loading="lazy"
-            className="pixelated h-full w-full object-contain"
+            className="h-full w-full object-contain"
           />
         </div>}
     </section>
 
     <div className="md:flex md:items-start">
       <aside className="sticky top-6 hidden shrink-0 self-start pb-10 pl-5 pt-10 md:block md:w-[45%] md:pr-10">
-        <p className="font-mono text-sm max-md:text-[18px] uppercase tracking-wide text-ink/40">
+        <p className="eyebrow text-ink/40">
           On this page
         </p>
         <nav className="relative mt-3 max-w-md">
@@ -256,18 +258,18 @@ export function WorkDetail({ slug: slugProp } = {}) {
             {tocSections.map((s) => {
               const isStory = storySections.some((story) => story.id === s.id);
               const isActive = activeSection === s.id;
-              return (<li key={s.id} className={`border-l-2 pl-4 transition-colors duration-300 ${isActive ? 'border-accent' : 'border-ink/15'}`}>
+              return (<li key={s.id} className={`border-l pl-4 transition-colors duration-300 ${isActive ? 'border-accent' : 'border-ink/10'}`}>
                 <button
                   type="button"
                   data-toc-id={s.id}
                   onClick={scrollToSection(s.id)}
-                  className={`block w-full py-2 text-left font-mono text-xl transition-colors ${isActive ? 'text-ink' : 'text-ink/50 hover:text-ink'}`}
+                  className={`block w-full py-2 text-left font-display text-2xl italic transition-colors ${isActive ? 'text-ink' : 'text-ink/40 hover:text-ink'}`}
                 >
                   {s.label}
                 </button>
                 {isStory &&
                   <div ref={registerPanel(s.id)} className="h-0 overflow-hidden opacity-0">
-                    <p className="font-body pb-4 pr-2 text-base leading-relaxed text-ink/70">
+                    <p className="pb-4 pr-2 text-[14px] leading-relaxed text-ink/65">
                       <Highlighted text={project[s.id]} terms={project.highlightTerms} />
                     </p>
                   </div>}
@@ -279,16 +281,16 @@ export function WorkDetail({ slug: slugProp } = {}) {
 
       {/* Main content column */}
       <div className="min-w-0 flex-1">
-        <section className="w-full px-8 py-14 md:py-20">
+        <section className="w-full px-6 py-14 sm:px-10 md:py-20">
           <div className="space-y-16 md:space-y-10">
             {imageGroups.map((s) => <div key={s.id} id={s.id} ref={registerSection(s.id)} className="scroll-mt-6">
-              <h2 className="font-mono text-2xl text-accent md:hidden">{s.label}</h2>
-              <p className="font-body mt-4 text-[20px] leading-relaxed text-ink/80 md:hidden">
+              <h2 className="font-display text-4xl italic md:hidden">{s.label}</h2>
+              <p className="mt-4 text-[15px] leading-relaxed text-ink/70 md:hidden">
                 <Highlighted text={project[s.id]} terms={project.highlightTerms} />
               </p>
 
               {s.images.length > 0 &&
-                <div className="mt-6 space-y-10 md:mt-0">
+                <div className="mt-6 space-y-12 md:mt-0">
                   {s.images.map((img) => <ProjectImage key={img.url} image={img} />)}
                 </div>}
             </div>)}
