@@ -101,7 +101,6 @@ export function Taskbar({ onRestart }) {
               setStartOpen(false);
             }} className="group flex items-center gap-3 px-3 py-2 text-left font-mono text-xl text-ink hover:bg-accent-2 max-md:text-[28px]">
 
-              <app.icon size={22} style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }} />
               {app.label}
             </button>)}
           </nav>

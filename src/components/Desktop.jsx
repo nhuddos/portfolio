@@ -9,6 +9,7 @@ import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
 import { Field } from './Field';
+import { PopupStorm } from './PopupStorm';
 import { pixelBurst, wiggle } from '../motion';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
 function getTimeOfDay(date = new Date()) {
@@ -41,6 +42,9 @@ export function Desktop() {
   const [booted, setBooted] = useState(bootedBefore);
   const [revealed, setRevealed] = useState(bootedBefore);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  /* The "virus" pop-up storm plays right after a fresh boot. */
+  const [popupsActive, setPopupsActive] = useState(false);
+  const endPopups = useCallback(() => setPopupsActive(false), []);
   const syncedPath = useRef('');
   const dockRef = useRef(null);
   const mobileMenuRef = useRef(null);
@@ -49,11 +53,13 @@ export function Desktop() {
     sessionStorage.setItem('nhuddos-os-booted', '1');
     setRevealed(true);
     setBooted(true);
+    setPopupsActive(true);
   }, []);
   const restart = useCallback(() => {
     sessionStorage.removeItem('nhuddos-os-booted');
     setRevealed(false);
     setBooted(false);
+    setPopupsActive(false);
   }, []);
   /* Desktop icons cascade in once the machine finishes booting. */
   useEffect(() => {
@@ -198,7 +204,7 @@ export function Desktop() {
   </>;
   /* Clicking bare desktop (not a window, icon or the dock) throws pixel confetti. */
   const onDesktopPointerDown = (e) => {
-    if (e.target.closest('section, button, a, input, [data-taskbar], [data-icon]')) return;
+    if (e.target.closest('section, button, a, input, [data-taskbar], [data-icon], [data-popup-storm]')) return;
     if (!e.target.closest('[data-desktop-surface]')) return;
     pixelBurst(e.clientX, e.clientY);
   };
@@ -268,6 +274,8 @@ export function Desktop() {
       </div>)}
 
     <Taskbar onRestart={restart} />
+
+    {booted && popupsActive && <PopupStorm onDone={endPopups} />}
 
   </div>);
 }

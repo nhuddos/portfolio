@@ -176,9 +176,9 @@ const TOOLS = [
   { id: 'select', label: 'Select', icon: MousePointer2Icon, hint: 'The page works as normal. Grab a tool to start drawing.' },
   { id: 'pencil', label: 'Pencil', icon: PencilIcon, hint: 'Drag on the canvas to draw. The line-size box sets the width.' },
   { id: 'brush', label: 'Brush', icon: BrushIcon, hint: 'A chunkier brush. Drag on the canvas.' },
-  { id: 'eraser', label: 'Eraser', icon: EraserIcon, hint: 'Drag to rub out your scribbles.' },
-  { id: 'fill', label: 'Fill', icon: PaintBucketIcon, hint: 'Click VISUAL or DESIGNER to fill it with the current colour.' },
-  { id: 'picker', label: 'Colour picker', icon: PipetteIcon, hint: 'Click VISUAL or DESIGNER to pick up its colour.' }
+  { id: 'eraser', label: 'Eraser', icon: EraserIcon, hint: 'Rub out scribbles, letters, buttons, even the picture. Reset brings it all back.' },
+  { id: 'fill', label: 'Fill', icon: PaintBucketIcon, hint: 'Click VISUAL or DESIGNER to recolour it, or the empty page to paint the paper.' },
+  { id: 'picker', label: 'Colour picker', icon: PipetteIcon, hint: 'Click a word or the page to pick up its colour.' }
 ];
 
 const PALETTE = [
@@ -217,8 +217,9 @@ function HomePaint() {
   const [tool, setTool] = useState('select');
   const [color, setColor] = useState('var(--accent)');
   const [lineSize, setLineSize] = useState(2);
-  const [fills, setFills] = useState({ visual: null, designer: null });
+  const [fills, setFills] = useState({ visual: null, designer: null, sheet: null });
   const [dirty, setDirty] = useState(false);
+  const [erased, setErased] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
 
   const rootRef = useRef(null);
@@ -226,12 +227,39 @@ function HomePaint() {
   const sheetRef = useRef(null);
   const canvasRef = useRef(null);
   const coordRef = useRef(null);
+  const contentRef = useRef(null);
+  const brushRef = useRef(null);
+  /* Low-res erase mask: one mask pixel per CELL. Opaque = visible content. */
+  const maskRef = useRef(null);
+  const maskFrame = useRef(0);
   const drawing = useRef(false);
   const last = useRef(null);
 
   const activeTool = TOOLS.find((t) => t.id === tool) ?? TOOLS[0];
   const isDrawTool = tool === 'pencil' || tool === 'brush' || tool === 'eraser';
   const wordColor = (which) => fills[which] ?? DEFAULT_WORD_COLOR[which];
+  const sheetColor = fills.sheet ?? 'var(--paper)';
+
+  const applyMask = () => {
+    const content = contentRef.current;
+    const mask = maskRef.current;
+    if (!content || !mask) return;
+    const url = `url(${mask.toDataURL()})`;
+    const size = `${mask.width * CELL}px ${mask.height * CELL}px`;
+    Object.assign(content.style, {
+      maskImage: url, webkitMaskImage: url,
+      maskSize: size, webkitMaskSize: size,
+      maskRepeat: 'no-repeat', webkitMaskRepeat: 'no-repeat'
+    });
+  };
+  const scheduleMask = () => {
+    if (maskFrame.current) return;
+    maskFrame.current = requestAnimationFrame(() => {
+      maskFrame.current = 0;
+      applyMask();
+    });
+  };
+  useEffect(() => () => cancelAnimationFrame(maskFrame.current), []);
 
   useEffect(() => {
     const sheet = sheetRef.current;
@@ -249,6 +277,20 @@ function HomePaint() {
       cv.height = h;
       cv.getContext('2d').drawImage(copy, 0, 0);
       setCanvasSize({ w, h });
+
+      const prev = maskRef.current;
+      const mask = document.createElement('canvas');
+      mask.width = Math.ceil(w / CELL);
+      mask.height = Math.ceil(h / CELL);
+      const mctx = mask.getContext('2d');
+      mctx.fillStyle = '#fff';
+      mctx.fillRect(0, 0, mask.width, mask.height);
+      if (prev) {
+        mctx.clearRect(0, 0, prev.width, prev.height);
+        mctx.drawImage(prev, 0, 0);
+      }
+      maskRef.current = mask;
+      if (prev) applyMask();
     });
     ro.observe(sheet);
     return () => ro.disconnect();
@@ -279,6 +321,12 @@ function HomePaint() {
     const gy = Math.floor(y / CELL) * CELL - offset;
     if (tool === 'eraser') {
       ctx.clearRect(gx, gy, size, size);
+      const mask = maskRef.current;
+      if (mask) {
+        mask.getContext('2d').clearRect(gx / CELL, gy / CELL, cells, cells);
+        scheduleMask();
+        if (!erased) setErased(true);
+      }
     } else {
       ctx.fillStyle = resolveColor(cv, color);
       ctx.fillRect(gx, gy, size, size);
@@ -316,11 +364,49 @@ function HomePaint() {
     last.current = null;
   };
 
-  const clearCanvas = () => {
+  /* Wipes scribbles, colours and erasures. Erased content heals back in
+     from the top in hard pixel steps. */
+  const resetAll = () => {
     const cv = canvasRef.current;
-    if (!cv) return;
-    cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+    cv?.getContext('2d').clearRect(0, 0, cv.width, cv.height);
     setDirty(false);
+    setFills({ visual: null, designer: null, sheet: null });
+    const mask = maskRef.current;
+    const content = contentRef.current;
+    if (!erased || !mask || !content) return;
+    setErased(false);
+    const mctx = mask.getContext('2d');
+    const finish = () => {
+      mctx.fillStyle = '#fff';
+      mctx.fillRect(0, 0, mask.width, mask.height);
+      ['maskImage', 'webkitMaskImage', 'maskSize', 'webkitMaskSize', 'maskRepeat', 'webkitMaskRepeat'].forEach((k) => { content.style[k] = ''; });
+    };
+    if (reducedMotion()) {
+      finish();
+      return;
+    }
+    const heal = { p: 0 };
+    gsap.to(heal, {
+      p: 1,
+      duration: 0.7,
+      ease: 'steps(14)',
+      onUpdate: () => {
+        mctx.fillStyle = '#fff';
+        mctx.fillRect(0, 0, mask.width, Math.ceil(mask.height * heal.p));
+        applyMask();
+      },
+      onComplete: finish
+    });
+  };
+
+  /* Fill / picker on the empty page itself paints or samples the paper. */
+  const onSheetClick = (e) => {
+    if (e.target.closest('[data-word]')) return;
+    if (tool === 'fill') {
+      setFills((f) => ({ ...f, sheet: color }));
+      hop(e.currentTarget.querySelector('h1'), 6);
+    }
+    if (tool === 'picker') setColor(sheetColor);
   };
 
   const onWordClick = (which) => {
@@ -339,9 +425,25 @@ function HomePaint() {
     const x = Math.round(((e.clientX - r.left) * sheet.offsetWidth) / r.width);
     const y = Math.round(((e.clientY - r.top) * sheet.offsetHeight) / r.height);
     coordRef.current.textContent = `X ${x}  Y ${y}`;
+    const brush = brushRef.current;
+    if (!brush) return;
+    if (!isDrawTool) {
+      brush.style.opacity = '0';
+      return;
+    }
+    const cells = cellsForTool();
+    const size = cells * CELL;
+    const offset = Math.floor((cells - 1) / 2) * CELL;
+    Object.assign(brush.style, {
+      opacity: '1',
+      width: `${size}px`,
+      height: `${size}px`,
+      transform: `translate(${Math.floor(x / CELL) * CELL - offset}px, ${Math.floor(y / CELL) * CELL - offset}px)`
+    });
   };
   const onSheetLeave = () => {
     if (coordRef.current) coordRef.current.textContent = 'X -  Y -';
+    if (brushRef.current) brushRef.current.style.opacity = '0';
   };
 
   const ToolIcon = activeTool.icon;
@@ -402,8 +504,14 @@ function HomePaint() {
             onPointerMove={onSheetMove}
             onPointerLeave={onSheetLeave}
             style={{ containerType: 'inline-size' }}
-            className="relative flex h-full min-h-0 flex-col justify-between gap-4 overflow-hidden bevel bg-paper p-5 lg:p-6"
+            className="dither relative h-full min-h-0 overflow-hidden bevel bg-paper"
           >
+            <div
+              ref={contentRef}
+              onClick={onSheetClick}
+              className="absolute inset-0 flex flex-col justify-between gap-4 p-5 transition-colors duration-300 lg:p-6"
+              style={{ backgroundColor: sheetColor, imageRendering: 'pixelated', cursor: tool === 'fill' || tool === 'picker' ? 'cell' : undefined }}
+            >
             <h1
               className="flex w-full shrink-0 flex-wrap items-center justify-center text-center"
               style={{ gap: '0.5rem 2cqw' }}
@@ -412,6 +520,7 @@ function HomePaint() {
                 data-split
                 ref={visualRef}
                 onMouseEnter={scrambleVisual}
+                data-word
                 onClick={() => onWordClick('visual')}
                 className="font-handjet font-black leading-[0.85] tracking-tight select-none"
                 style={{ fontSize: 'min(15cqw, 165px)', color: wordColor('visual'), cursor: wordCursor }}
@@ -421,6 +530,7 @@ function HomePaint() {
 
               <span
                 className="relative inline-block px-3 py-1 lg:px-6"
+                data-word
                 style={{ cursor: wordCursor }}
                 onClick={() => onWordClick('designer')}
               >
@@ -429,8 +539,8 @@ function HomePaint() {
                   <span
                     data-pop
                     key={pos}
-                    className={`pointer-events-none absolute ${pos} h-3 w-3 border-2 bg-paper`}
-                    style={{ borderColor: wordColor('designer') }}
+                    className={`pointer-events-none absolute ${pos} h-3 w-3 border-2`}
+                    style={{ borderColor: wordColor('designer'), backgroundColor: sheetColor }}
                   />
                 ))}
 
@@ -447,6 +557,7 @@ function HomePaint() {
 
             <IntroRow />
             <WallpaperCutout timeBg={timeBg} />
+            </div>
 
             <canvas
               ref={canvasRef}
@@ -455,7 +566,13 @@ function HomePaint() {
               onPointerMove={onCanvasMove}
               onPointerUp={endStroke}
               onPointerCancel={endStroke}
-              className={`absolute inset-0 z-10 h-full w-full touch-none ${isDrawTool ? 'cursor-crosshair' : 'pointer-events-none'}`}
+              className={`absolute inset-0 z-10 h-full w-full touch-none ${isDrawTool ? 'cursor-none' : 'pointer-events-none'}`}
+            />
+            <div
+              ref={brushRef}
+              aria-hidden="true"
+              className={`pointer-events-none absolute left-0 top-0 z-20 opacity-0 ${tool === 'eraser' ? 'border-2 border-dashed border-ink bg-paper/40' : 'border-2 border-ink'}`}
+              style={tool === 'eraser' ? undefined : { backgroundColor: color }}
             />
           </div>
         </div>
@@ -490,13 +607,16 @@ function HomePaint() {
 
         <span ref={coordRef} className="hidden shrink-0 font-mono text-lg leading-none tabular-nums text-ink/40 lg:inline">X -  Y -</span>
 
-        {dirty && (
+        {(dirty || erased || fills.visual || fills.designer || fills.sheet) && (
           <button
             type="button"
-            onClick={clearCanvas}
+            onClick={(e) => {
+              resetAll();
+              hop(e.currentTarget, 5);
+            }}
             className="shrink-0 bevel bg-paper px-3 py-1 font-mono text-lg uppercase leading-none text-ink hover:bg-accent-2"
           >
-            Clear
+            Reset
           </button>
         )}
       </div>

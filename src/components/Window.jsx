@@ -4,8 +4,6 @@ import gsap from "gsap";
 import { MinusIcon, SquareIcon, XIcon, CopyIcon } from "lucide-react";
 import { useDesktop } from "../contexts/DesktopContext";
 import { MenuBar } from "./MenuBar";
-import { appRegistry } from "./appRegistry";
-import { wiggle } from "../motion";
 
 export function Window({ win, children, isNarrow, hold = false }) {
     const { focus, close, minimize, toggleMaximize, move, focusedId, open } = useDesktop();
@@ -15,9 +13,6 @@ export function Window({ win, children, isNarrow, hold = false }) {
     const drag = useRef(null);
     const isFocused = focusedId === win.id;
     const isMax = win.status === 'maximized' || isNarrow;
-    const app = appRegistry[win.appId];
-    const AppGlyph = app?.icon;
-    const appTint = `color-mix(in srgb, ${app?.tint ?? 'var(--accent-2)'} 55%, var(--paper))`;
 
     useLayoutEffect(() => {
         const el = ref.current;
@@ -225,7 +220,6 @@ export function Window({ win, children, isNarrow, hold = false }) {
                 className={`flex shrink-0 items-center justify-between gap-2 px-2.5 py-2.5 sm:py-2 ${isMax ? '' : 'titlebar-grab'} ${isFocused ? 'bg-ink text-paper' : 'dither bg-paper text-ink/60'}`}
             >
                 <div className="flex min-w-0 items-center gap-2.5">
-                    {AppGlyph && <span onMouseEnter={(e) => wiggle(e.currentTarget)} className="shrink-0"><AppGlyph size={18} style={{ '--icon-fill': appTint }} /></span>}
                     <span className="truncate font-mono text-lg uppercase leading-none max-md:text-[24px]">
                         {win.appId === 'project' && win.title.includes('\u203A') ?
                             <>
