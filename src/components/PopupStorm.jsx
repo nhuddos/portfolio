@@ -21,13 +21,30 @@ const STAY = { title: 'Warning', kind: 'warn', text: 'please stay', buttons: ['O
 const SCARED = { title: 'Error', kind: 'warn', text: "actually no dont stay i'm kind of scared of commitment", buttons: ['OK', 'Cancel'] };
 const BUT = { title: 'Warning', kind: 'warn', text: 'but please stay', buttons: ['OK'] };
 
-// The storm, in order. `image: n` picks IMAGES[n % IMAGES.length].
+const say = (title, kind, text, buttons = ['OK']) => ({ title, kind, text, buttons });
+
+// The storm, in order. Every message and every image appears exactly once;
+// `image: n` picks IMAGES[n].
 const SCRIPT = [
-  ASK, { image: 0 }, WORTH, STAY, { image: 1 }, ASK, STAY, { image: 2 },
-  WORTH, SCARED, { image: 3 }, BUT, STAY, { image: 4 }, WORTH, BUT,
-  { image: 5 }, STAY, ASK, { image: 6 }, SCARED, BUT, { image: 7 }, STAY,
-  WORTH, { ...STAY, buttons: ['Fine'] }
-];
+  ASK, { image: 0 }, WORTH,
+  say('Message', 'info', 'im actually a catch'),
+  { image: 1 }, STAY,
+  say('Message', 'info', 'im a really nice guy'),
+  { image: 2 },
+  say('Security', 'question', 'trust me', ['OK', 'Sure']),
+  SCARED, { image: 3 }, BUT,
+  say('hire_me.exe', 'warn', 'hire me', ['Hire', 'Hire']),
+  { image: 4 },
+  say('Message', 'question', 'pick me', ['OK']),
+  say('Message', 'warn', 'PICK ME', ['OK']),
+  { image: 5 },
+  say('Message', 'info', 'im running out of things i want to say'),
+  say('Request', 'question', 'email me ur fav anime if ur not gonna hire me', ['OK', 'Later']),
+  { image: 6 },
+  say('recruiter.exe', 'info', 'lowkirkenuinely hit my line if ur a recruiter', ['OK']),
+  { image: 7 },
+  say('Warning', 'warn', 'please please please', ['OK', 'OK', 'OK'])
+].filter((entry) => entry.image == null || entry.image < IMAGES.length);
 
 // Held back until every other popup has been closed.
 const FINALE = { title: 'Hello?', kind: 'question', text: 'you still here?', buttons: ['Yes', 'Yes'] };
@@ -138,10 +155,8 @@ function makePopup(entry, area, { center = false } = {}) {
 
   let content = entry;
   if (isImage) {
-    const img = IMAGES.length ? IMAGES[entry.image % IMAGES.length] : null;
-    content = img ?
-      { title: img.name, image: img, buttons: ['OK'] } :
-      STAY;
+    const img = IMAGES[entry.image];
+    content = { title: img.name, image: img, buttons: ['OK'] };
   }
   nextId += 1;
   return { id: nextId, x: Math.round(x), y: Math.round(Math.max(8, y)), width, ...content };

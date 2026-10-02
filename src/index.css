@@ -198,6 +198,11 @@ body {
     --px-drop: 0 0 #0000;
   }
 
+  /* Horizontal pinstripes, like a classic Mac title bar. */
+  .pinstripe {
+    background-image: repeating-linear-gradient(to bottom, var(--ink) 0 2px, transparent 2px 4px);
+  }
+
   /* 50% ordered dither, for quiet fills (unfocused title bars, tracks). */
   .dither {
     background-image: conic-gradient(rgb(var(--ink-rgb) / 0.14) 25%, transparent 0 50%, rgb(var(--ink-rgb) / 0.14) 0 75%, transparent 0);

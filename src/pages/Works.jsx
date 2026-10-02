@@ -4,14 +4,38 @@ import { Flip } from 'gsap/Flip';
 import { SearchIcon, XIcon } from 'lucide-react';
 import { useScreenInit } from '../useScreenInit.js';
 import { ProjectCard } from '../components/ProjectCard';
+import { ResultLink } from '../components/ResultLink';
 import { projects } from '../data/projects';
+import { moreProjects } from '../data/moreProjects';
 import { reducedMotion, useEntrance } from '../motion';
 
 gsap.registerPlugin(Flip);
 
+const TOTAL = projects.length + moreProjects.length;
+
+const matches = (p, active, q) => {
+  if (active !== 'All' && p.category !== active) return false;
+  if (!q) return true;
+  return [p.title, p.summary, p.category, p.year, ...(p.tags || [])].join(' ').toLowerCase().includes(q);
+};
+
+/* Section divider with pinstripes, like an old Mac window's title bar. */
+function SectionBar({ children, count }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="pinstripe h-[14px] flex-1 opacity-70" aria-hidden="true" />
+      <h2 className="shrink-0 font-mono text-xl uppercase leading-none text-ink">
+        {children}
+        <span className="ml-2 text-ink/40">({count})</span>
+      </h2>
+      <span className="pinstripe h-[14px] flex-1 opacity-70" aria-hidden="true" />
+    </div>
+  );
+}
+
 export function Works() {
   useScreenInit();
-  const categories = useMemo(() => ['All', ...Array.from(new Set(projects.map((p) => p.category)))], []);
+  const categories = useMemo(() => ['All', ...Array.from(new Set([...projects, ...moreProjects].map((p) => p.category).filter(Boolean)))], []);
   const [active, setActive] = useState('All');
   const [query, setQuery] = useState('');
   const rootRef = useRef(null);
@@ -21,33 +45,27 @@ export function Works() {
 
   /* Snapshot card positions before a filter change so Flip can glide them. */
   const withFlip = (update) => {
-    if (gridRef.current && !reducedMotion()) flipState.current = Flip.getState(gridRef.current.children);
+    if (rootRef.current && !reducedMotion()) flipState.current = Flip.getState(rootRef.current.querySelectorAll('[data-flip-id]'));
     update();
   };
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return projects.filter((p) => {
-      const matchesCategory = active === 'All' || p.category === active;
-      if (!matchesCategory) return false;
-      if (!q) return true;
-      const haystack = [p.title, p.summary, p.category, ...(p.tags || [])].join(' ').toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [active, query]);
+  const q = query.trim().toLowerCase();
+  const filtered = useMemo(() => projects.filter((p) => matches(p, active, q)), [active, q]);
+  const filteredMore = useMemo(() => moreProjects.filter((p) => matches(p, active, q)), [active, q]);
+  const resultCount = filtered.length + filteredMore.length;
 
   const resultsLabel = query ?
     `Results for \u201C${query}\u201D` :
     `Trending results for ${active === 'All' ? 'Works' : active}`;
 
-  const fakeSeconds = (0.02 + filtered.length * 0.015).toFixed(2);
+  const fakeSeconds = (0.02 + resultCount * 0.015).toFixed(2);
 
   useLayoutEffect(() => {
     const state = flipState.current;
     flipState.current = null;
-    if (!state || !gridRef.current) return;
+    if (!state || !rootRef.current) return;
     Flip.from(state, {
-      targets: gridRef.current.children,
+      targets: rootRef.current.querySelectorAll('[data-flip-id]'),
       duration: 0.55,
       ease: 'power3.inOut',
       stagger: 0.03,
@@ -64,7 +82,7 @@ export function Works() {
           Works<span className="text-accent">.</span>
         </h1>
         <p data-anim className="pb-1 font-mono text-lg uppercase leading-none text-ink/50">
-          {String(projects.length).padStart(2, '0')} projects
+          {String(TOTAL).padStart(2, '0')} projects
         </p>
       </div>
 
@@ -105,17 +123,29 @@ export function Works() {
           {resultsLabel}
         </p>
         <p className="font-mono text-sm max-md:text-[18px] text-ink/40">
-          {filtered.length} result{filtered.length === 1 ? '' : 's'} &middot; {fakeSeconds}s
+          About {resultCount} result{resultCount === 1 ? '' : 's'} &middot; {fakeSeconds}s
         </p>
       </div>
 
-      <div ref={gridRef} className="mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
-        {filtered.map((project, i) => <div key={project.slug} data-flip-id={project.slug} className="h-full">
-          <ProjectCard project={project} index={i} />
-        </div>)}
-      </div>
+      {filtered.length > 0 && <>
+        <div className="mt-8"><SectionBar count={filtered.length}>Featured</SectionBar></div>
+        <div ref={gridRef} className="mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((project, i) => <div key={project.slug} data-flip-id={project.slug} className="h-full">
+            <ProjectCard project={project} index={i} />
+          </div>)}
+        </div>
+      </>}
 
-      {filtered.length === 0 &&
+      {filteredMore.length > 0 && <>
+        <div className="mt-14"><SectionBar count={filteredMore.length}>More results</SectionBar></div>
+        <div className="mt-8 flex max-w-3xl flex-col gap-7">
+          {filteredMore.map((project, i) => <div key={project.slug} data-flip-id={`more-${project.slug}`}>
+            <ResultLink project={project} index={i} />
+          </div>)}
+        </div>
+      </>}
+
+      {resultCount === 0 &&
         <p className="py-16 text-center font-mono text-xl text-ink/50">
           No results{query ? ` for \u201C${query}\u201D` : ''} in this category yet.
         </p>}
