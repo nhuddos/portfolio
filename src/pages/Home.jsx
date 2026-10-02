@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import {
@@ -16,6 +15,7 @@ import {
 import { useScreenInit } from '../useScreenInit.js';
 import { useIsNarrow } from '../useIsNarrow.js';
 import { asset } from '../assetUrl.js';
+import { hop, useEntrance } from '../motion';
 
 gsap.registerPlugin(ScrambleTextPlugin);
 
@@ -66,25 +66,27 @@ function useScramble(text, duration) {
 function IntroRow() {
   return (
     <div className="flex shrink-0 flex-col md:flex-row items-start md:items-center justify-between gap-6">
-      <p className="font-body max-w-md text-base leading-snug text-ink/90">
+      <p data-anim className="font-body max-w-md text-base leading-snug text-ink/90">
         A student designer with a passion for visual storytelling, digital design, and creating unique and immersive experiences across web, motion, and print.
       </p>
 
       <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center shrink-0">
         <Link
+          data-anim
           to="/works"
-          className="font-vt323 inline-flex items-center justify-center gap-2 bevel bg-accent px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-paper shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-none"
+          className="group font-vt323 inline-flex items-center justify-center gap-2 bevel bg-accent px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-paper transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-none"
         >
           SEE MY WORK <ArrowRightIcon size={20} className="sm:hidden" />
-          <ArrowRightIcon size={18} className="hidden sm:block" />
+          <ArrowRightIcon size={18} className="hidden transition-transform duration-200 group-hover:translate-x-1 sm:block" />
         </Link>
         <a
           href={asset('/KhanhDo_CV.pdf')}
+          data-anim
           download="Khanh_Do_CV.pdf"
-          className="font-vt323 inline-flex items-center justify-center gap-2 bevel bg-paper px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-ink shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-none"
+          className="group font-vt323 inline-flex items-center justify-center gap-2 bevel bg-paper px-6 py-4 text-xl sm:px-5 sm:py-2.5 sm:text-xl font-bold uppercase tracking-wide text-ink transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-none"
         >
           DOWNLOAD RESUME <ArrowDownIcon size={20} className="sm:hidden" />
-          <ArrowDownIcon size={18} className="hidden sm:block" />
+          <ArrowDownIcon size={18} className="hidden transition-transform duration-200 group-hover:translate-y-0.5 sm:block" />
         </a>
       </div>
     </div>
@@ -93,7 +95,7 @@ function IntroRow() {
 
 function WallpaperCutout({ timeBg }) {
   return (
-    <div className="relative w-full flex-1 min-h-[90px] max-h-[220px] sm:max-h-[280px] md:max-h-[320px] mt-auto">
+    <div data-anim className="relative w-full flex-1 min-h-[90px] max-h-[220px] sm:max-h-[280px] md:max-h-[320px] mt-auto">
       <svg width="0" height="0" className="absolute pointer-events-none">
         <defs>
           <clipPath id="bottomNotchedClip" clipPathUnits="objectBoundingBox">
@@ -137,31 +139,30 @@ function HomeMobile() {
   const timeBg = useTimeBackground();
   const [visualRef, scrambleVisual] = useScramble('VISUAL', 0.5);
   const [designerRef, scrambleDesigner] = useScramble('DESIGNER', 0.55);
+  const rootRef = useRef(null);
+  useEntrance(rootRef);
 
   return (
-    <div className="w-full h-full min-h-0 bg-paper flex flex-col justify-between p-6 sm:p-8 gap-6 font-vt323 overflow-hidden">
+    <div ref={rootRef} className="w-full h-full min-h-0 bg-paper flex flex-col justify-between p-6 sm:p-8 gap-6 font-vt323 overflow-hidden">
       <h1 className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-3 text-center w-full">
-        <span ref={visualRef} onMouseEnter={scrambleVisual} className="font-handjet font-black w-full sm:w-auto text-[24vw] sm:text-[80px] md:text-[110px] lg:text-[165px] leading-[0.85] tracking-tight text-ink select-none">
+        <span data-split ref={visualRef} onMouseEnter={scrambleVisual} className="font-handjet font-black w-full sm:w-auto text-[24vw] sm:text-[80px] md:text-[110px] lg:text-[165px] leading-[0.85] tracking-tight text-ink select-none">
           VISUAL
         </span>
 
         <span className="relative inline-block px-3 sm:px-6 py-1 my-1">
           <span className="absolute inset-0 border-2 border-accent pointer-events-none" />
-          <span className="absolute -top-1.5 -left-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-          <span className="absolute -top-1.5 -right-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-          <span className="absolute -bottom-1.5 -left-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
-          <span className="absolute -bottom-1.5 -right-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
+          <span data-pop className="absolute -top-1.5 -left-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
+          <span data-pop className="absolute -top-1.5 -right-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
+          <span data-pop className="absolute -bottom-1.5 -left-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
+          <span data-pop className="absolute -bottom-1.5 -right-1.5 w-3 h-3 border-2 border-accent bg-paper pointer-events-none" />
 
-          <motion.span
+          <span data-split
             ref={designerRef}
             onMouseEnter={scrambleDesigner}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.05 }}
             className="font-handjet font-black text-[24vw] sm:text-[80px] md:text-[110px] lg:text-[165px] leading-[0.85] tracking-tight text-accent select-none block"
           >
             DESIGNER
-          </motion.span>
+          </span>
         </span>
       </h1>
 
@@ -220,6 +221,8 @@ function HomePaint() {
   const [dirty, setDirty] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
 
+  const rootRef = useRef(null);
+  useEntrance(rootRef);
   const sheetRef = useRef(null);
   const canvasRef = useRef(null);
   const coordRef = useRef(null);
@@ -321,7 +324,10 @@ function HomePaint() {
   };
 
   const onWordClick = (which) => {
-    if (tool === 'fill') setFills((f) => ({ ...f, [which]: color }));
+    if (tool === 'fill') {
+      setFills((f) => ({ ...f, [which]: color }));
+      hop(which === 'visual' ? visualRef.current : designerRef.current, 14);
+    }
     if (tool === 'picker') setColor(wordColor(which));
   };
   const wordCursor = tool === 'fill' || tool === 'picker' ? 'cell' : undefined;
@@ -341,7 +347,7 @@ function HomePaint() {
   const ToolIcon = activeTool.icon;
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-paper font-vt323">
+    <div ref={rootRef} className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-paper font-vt323">
       <div className="flex min-h-0 flex-1">
         <aside
           className="flex w-[92px] shrink-0 flex-col gap-5 overflow-y-auto border-r-2 border-ink/10 bg-paper p-3"
@@ -355,13 +361,17 @@ function HomePaint() {
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() => setTool(t.id)}
+                  data-pop
+                  onClick={(e) => {
+                    setTool(t.id);
+                    hop(e.currentTarget, 5);
+                  }}
                   aria-label={t.label}
                   aria-pressed={active}
                   title={t.label}
                   className={`grid h-8 w-8 place-items-center bevel text-ink transition-transform duration-75 ${active
                     ? 'translate-x-[2px] translate-y-[2px] bg-accent-2'
-                    : 'bg-paper shadow-pixel-sm hover:bg-accent-2/40'
+                    : 'bg-paper hover:bg-accent-2/40'
                     }`}
                 >
                   <Icon size={16} strokeWidth={2.5} />
@@ -392,13 +402,14 @@ function HomePaint() {
             onPointerMove={onSheetMove}
             onPointerLeave={onSheetLeave}
             style={{ containerType: 'inline-size' }}
-            className="relative flex h-full min-h-0 flex-col justify-between gap-4 overflow-hidden bevel bg-paper p-5 shadow-pixel lg:p-6"
+            className="relative flex h-full min-h-0 flex-col justify-between gap-4 overflow-hidden bevel bg-paper p-5 lg:p-6"
           >
             <h1
               className="flex w-full shrink-0 flex-wrap items-center justify-center text-center"
               style={{ gap: '0.5rem 2cqw' }}
             >
               <span
+                data-split
                 ref={visualRef}
                 onMouseEnter={scrambleVisual}
                 onClick={() => onWordClick('visual')}
@@ -416,23 +427,21 @@ function HomePaint() {
                 <span className="pointer-events-none absolute inset-0 border-2" style={{ borderColor: wordColor('designer') }} />
                 {['-top-1.5 -left-1.5', '-top-1.5 -right-1.5', '-bottom-1.5 -left-1.5', '-bottom-1.5 -right-1.5'].map((pos) => (
                   <span
+                    data-pop
                     key={pos}
                     className={`pointer-events-none absolute ${pos} h-3 w-3 border-2 bg-paper`}
                     style={{ borderColor: wordColor('designer') }}
                   />
                 ))}
 
-                <motion.span
+                <span data-split
                   ref={designerRef}
                   onMouseEnter={scrambleDesigner}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.05 }}
                   className="block font-handjet font-black leading-[0.85] tracking-tight select-none"
                   style={{ fontSize: 'min(15cqw, 165px)', color: wordColor('designer') }}
                 >
                   DESIGNER
-                </motion.span>
+                </span>
               </span>
             </h1>
 
@@ -460,8 +469,12 @@ function HomePaint() {
           {PALETTE.map((c, i) => (
             <button
               key={c}
+              data-pop
               type="button"
-              onClick={() => setColor(c)}
+              onClick={(e) => {
+                setColor(c);
+                hop(e.currentTarget, 4);
+              }}
               aria-label={`Colour ${i + 1}`}
               aria-pressed={color === c}
               className={`h-[18px] w-[18px] border-2 ${color === c ? 'border-ink ring-2 ring-accent' : 'border-ink/60 hover:border-ink'}`}

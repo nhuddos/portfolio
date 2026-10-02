@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { PowerIcon, MailIcon, XIcon } from 'lucide-react';
 import { CONTACT_LINKS, resolveLogoSrc } from '../data/contactLinks.js';
 import { useDesktop } from '../contexts/DesktopContext';
 import { desktopApps, titleFor } from './appRegistry';
+import { hop, reducedMotion } from '../motion';
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -26,6 +27,19 @@ export function Taskbar({ onRestart }) {
   const { windows, focusedId, open, close, toggleFromTaskbar } = useDesktop();
   const [startOpen, setStartOpen] = useState(false);
   const menuRef = useRef(null);
+  const knownTabs = useRef(new Set());
+
+  /* Newly opened windows pop into the dock. */
+  useLayoutEffect(() => {
+    const ids = windows.map((w) => w.id);
+    const fresh = ids.filter((id) => !knownTabs.current.has(id));
+    knownTabs.current = new Set(ids);
+    if (!fresh.length || reducedMotion()) return;
+    const els = fresh.map((id) => document.getElementById(`taskbar-tab-${id}`)).filter(Boolean);
+    gsap.fromTo(els, { scale: 0.4, y: 12, opacity: 0 }, {
+      scale: 1, y: 0, opacity: 1, duration: 0.5, ease: 'back.out(2.5)', stagger: 0.05, clearProps: 'transform,opacity'
+    });
+  }, [windows]);
 
   useEffect(() => {
     const el = menuRef.current;
@@ -39,7 +53,7 @@ export function Taskbar({ onRestart }) {
         ease: 'power3.out',
         transformOrigin: 'bottom center'
       });
-      gsap.fromTo(el.querySelectorAll('[data-menu-item]'), { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.2, ease: 'power2.out', stagger: 0.04, delay: 0.06 });
+      gsap.fromTo(el.querySelectorAll('[data-menu-item]'), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.35, ease: 'back.out(2)', stagger: 0.04, delay: 0.06 });
     }, el);
     return () => ctx.revert();
   }, [startOpen]);
@@ -62,10 +76,10 @@ export function Taskbar({ onRestart }) {
     };
   }, [startOpen]);
 
-  return (<div className="relative z-[60] shrink-0 px-2.5 pb-3 pt-1 sm:px-4 sm:pb-4">
+  return (<div data-taskbar className="relative z-[60] shrink-0 px-2.5 pb-3 pt-1 sm:px-4 sm:pb-4">
     <div className="flex items-center gap-2 bevel bg-paper px-2 py-2 shadow-pixel sm:gap-3">
     <div className="relative" data-start-region>
-      <button onClick={() => setStartOpen((v) => !v)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 px-3 py-2.5 text-lg uppercase text-ink max-md:text-[22px] sm:py-2 sm:text-xl ${startOpen ? 'bg-ink text-paper' : 'bg-accent hover:bg-accent-2'}`}>
+      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 px-3 py-2.5 text-lg uppercase text-ink max-md:text-[22px] sm:py-2 sm:text-xl ${startOpen ? 'bg-ink text-paper' : 'bg-accent hover:bg-accent-2'}`}>
         <span className="grid h-5 w-5 shrink-0 grid-cols-2 gap-px" aria-hidden>
           <i className="bg-ink" />
           <i className="bg-paper" />

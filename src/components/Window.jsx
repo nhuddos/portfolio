@@ -5,6 +5,7 @@ import { MinusIcon, SquareIcon, XIcon, CopyIcon } from "lucide-react";
 import { useDesktop } from "../contexts/DesktopContext";
 import { MenuBar } from "./MenuBar";
 import { appRegistry } from "./appRegistry";
+import { wiggle } from "../motion";
 
 export function Window({ win, children, isNarrow, hold = false }) {
     const { focus, close, minimize, toggleMaximize, move, focusedId, open } = useDesktop();
@@ -21,16 +22,20 @@ export function Window({ win, children, isNarrow, hold = false }) {
     useLayoutEffect(() => {
         const el = ref.current;
         if (!el || hold) return;
+        // Windows land like a dropped card: a little tilt that settles.
         gsap.fromTo(el, {
             opacity: 0,
-            scale: 0.9,
-            y: 16
+            scale: 0.86,
+            y: 28,
+            rotate: gsap.utils.random([-2, -1.5, 1.5, 2])
         }, {
             opacity: 1,
             scale: 1,
             y: 0,
-            duration: 0.28,
-            ease: 'back.out(1.6)'
+            rotate: 0,
+            duration: 0.55,
+            ease: 'back.out(1.7)',
+            clearProps: 'rotate'
         });
     }, [hold]);
 
@@ -51,8 +56,8 @@ export function Window({ win, children, isNarrow, hold = false }) {
             y: 0,
             scaleX: 1,
             scaleY: 1,
-            duration: 0.3,
-            ease: 'power3.inOut',
+            duration: 0.42,
+            ease: 'expo.inOut',
             transformOrigin: 'top left'
         });
     }, [win.status]);
@@ -106,11 +111,12 @@ export function Window({ win, children, isNarrow, hold = false }) {
         const el = ref.current;
         if (!el) return close(win.id);
         gsap.to(el, {
-            scale: 0.9,
+            scale: 0.88,
             opacity: 0,
-            y: 10,
-            duration: 0.18,
-            ease: 'power2.in',
+            y: 24,
+            rotate: 2,
+            duration: 0.22,
+            ease: 'back.in(1.6)',
             onComplete: () => close(win.id)
         });
     }, [close, win.id]);
@@ -219,7 +225,7 @@ export function Window({ win, children, isNarrow, hold = false }) {
                 className={`flex shrink-0 items-center justify-between gap-2 px-2.5 py-2.5 sm:py-2 ${isMax ? '' : 'titlebar-grab'} ${isFocused ? 'bg-ink text-paper' : 'dither bg-paper text-ink/60'}`}
             >
                 <div className="flex min-w-0 items-center gap-2.5">
-                    {AppGlyph && <AppGlyph size={18} style={{ '--icon-fill': appTint }} className="shrink-0" />}
+                    {AppGlyph && <span onMouseEnter={(e) => wiggle(e.currentTarget)} className="shrink-0"><AppGlyph size={18} style={{ '--icon-fill': appTint }} /></span>}
                     <span className="truncate font-mono text-lg uppercase leading-none max-md:text-[24px]">
                         {win.appId === 'project' && win.title.includes('\u203A') ?
                             <>

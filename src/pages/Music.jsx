@@ -13,6 +13,35 @@ import { useScreenInit } from '../useScreenInit.js';
 import { useIsNarrow } from '../useIsNarrow.js';
 import { PixelMusicIcon } from '../components/PixelIcons';
 import { tracks } from '../data/tracks';
+import gsap from 'gsap';
+import { hop, reducedMotion } from '../motion';
+
+/* Four pixel bars that bounce while music plays and settle when paused. */
+function Equalizer({ playing }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const bars = ref.current?.children;
+    if (!bars) return undefined;
+    if (!playing || reducedMotion()) {
+      gsap.to(bars, { scaleY: 0.25, duration: 0.3, ease: 'power2.out' });
+      return undefined;
+    }
+    const tween = gsap.to(bars, {
+      scaleY: () => gsap.utils.random(0.3, 1),
+      duration: 0.22,
+      ease: 'steps(3)',
+      repeat: -1,
+      repeatRefresh: true,
+      stagger: 0.05
+    });
+    return () => tween.kill();
+  }, [playing]);
+  return (
+    <span ref={ref} className="flex h-3.5 shrink-0 items-end gap-[2px]" aria-hidden="true">
+      {[0, 1, 2, 3].map((i) => <i key={i} className="h-full w-[3px] origin-bottom scale-y-[0.25] bg-accent" />)}
+    </span>
+  );
+}
 
 function formatTime(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
@@ -34,6 +63,13 @@ export function Music() {
   const [duration, setDuration] = useState(0);
 
   const track = hasTracks ? tracks[index] : null;
+  const titleRef = useRef(null);
+
+  /* New track: its title slides in from the right. */
+  useEffect(() => {
+    if (!titleRef.current || reducedMotion()) return;
+    gsap.fromTo(titleRef.current, { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: 'back.out(2)', clearProps: 'transform,opacity' });
+  }, [index]);
 
   // Keep the <audio> element's native loop attribute in sync with our toggle.
   useEffect(() => {
@@ -127,14 +163,15 @@ export function Music() {
           repeat: isPlaying ? Infinity : 0,
           duration: 6,
           ease: 'linear'
-        }} className="grid aspect-square w-full max-w-[260px] shrink-0 place-items-center bevel bg-accent-2 shadow-pixel-lg">
+        }} className="grid aspect-square w-full max-w-[260px] shrink-0 place-items-center bevel bg-accent-2  ">
 
           <PixelMusicIcon size={64} />
         </motion.div>
 
         <div className="w-full max-w-[260px] text-center">
-          <p className="truncate font-mono text-lg leading-relaxed">
-            {track.title}
+          <p ref={titleRef} className="flex items-center justify-center gap-2 font-mono text-lg leading-relaxed">
+            <Equalizer playing={isPlaying} />
+            <span className="truncate">{track.title}</span>
           </p>
           {track.artist &&
             <p className="mt-1.5 truncate font-mono text-lg text-ink/50">
@@ -159,7 +196,7 @@ export function Music() {
 
           <SkipBackIcon size={18} />
         </button>
-        <button onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'} className="grid h-16 w-16 place-items-center bevel bg-accent text-paper shadow-pixel-lg transition-transform active:translate-y-0.5 active:shadow-pixel">
+        <button onClick={(e) => { togglePlay(); hop(e.currentTarget, 6); }} aria-label={isPlaying ? 'Pause' : 'Play'} className="grid h-16 w-16 place-items-center bevel bg-accent text-paper transition-transform active:translate-y-0.5">
 
           {isPlaying ? <PauseIcon size={26} /> : <PlayIcon size={26} className="ml-0.5" />}
         </button>
@@ -192,7 +229,7 @@ export function Music() {
   return (<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-center gap-4 p-4">
     {/* Icon + title + loop */}
     <div className="flex items-center gap-3">
-      <div className="grid h-14 w-14 shrink-0 place-items-center bevel bg-accent-2 shadow-pixel">
+      <div className="grid h-14 w-14 shrink-0 place-items-center bevel bg-accent-2  ">
         <motion.div animate={{
           rotate: isPlaying ? 360 : 0
         }} transition={{
@@ -205,8 +242,9 @@ export function Music() {
         </motion.div>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-mono text-sm leading-relaxed">
-          {track.title}
+        <p ref={titleRef} className="flex items-center gap-2 font-mono text-sm leading-relaxed">
+          <Equalizer playing={isPlaying} />
+          <span className="truncate">{track.title}</span>
         </p>
         {track.artist &&
           <p className="truncate font-mono text-sm text-ink/50">
@@ -239,7 +277,7 @@ export function Music() {
 
         <RotateCcwIcon size={14} />
       </button>
-      <button onClick={togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'} className="grid h-11 w-11 place-items-center bevel bg-accent text-paper shadow-pixel transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-pixel-none">
+      <button onClick={(e) => { togglePlay(); hop(e.currentTarget, 6); }} aria-label={isPlaying ? 'Pause' : 'Play'} className="grid h-11 w-11 place-items-center bevel bg-accent text-paper transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-pixel-none">
 
         {isPlaying ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
       </button>

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import {
   ArrowLeftIcon,
@@ -8,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useScreenInit } from '../useScreenInit.js';
 import { getProject } from '../data/projects';
+import { reducedMotion, revealChars } from '../motion';
 
 const storySections = [
   { id: 'challenge', label: 'The Challenge' },
@@ -41,14 +41,30 @@ function Highlighted({ text, terms }) {
   </>);
 }
 
+/* Images wipe in from the top in hard pixel steps as they scroll into view. */
 function ProjectImage({ image, className = '' }) {
-  return (<motion.figure initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.4 }} className={className}>
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reducedMotion()) return undefined;
+    gsap.set(el, { clipPath: 'inset(0% 0% 100% 0%)' });
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      gsap.timeline()
+        .to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.7, ease: 'steps(10)' })
+        .fromTo(el.querySelector('img'), { scale: 1.12 }, { scale: 1, duration: 1.1, ease: 'expo.out', clearProps: 'transform' }, 0);
+    }, { root: el.closest('.window-scroll'), rootMargin: '0px 0px -10% 0px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return (<figure ref={ref} className={`overflow-hidden ${className}`}>
     <img src={image.url} alt={image.caption} loading="lazy" className="pixelated w-full object-cover" />
-  </motion.figure>);
+  </figure>);
 }
 
 function BigButton({ href, to, tone = 'solid', children }) {
-  const cls = `font-vt323 inline-flex items-center justify-center gap-2 bevel px-6 py-4 text-xl sm:px-5 sm:py-2.5 font-bold uppercase tracking-wide shadow-pixel transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-none ${tone === 'solid' ? 'bg-accent text-paper' : 'bg-paper text-ink'}`;
+  const cls = `font-vt323 inline-flex items-center justify-center gap-2 bevel px-6 py-4 text-xl sm:px-5 sm:py-2.5 font-bold uppercase tracking-wide   transition-transform duration-100 hover:-translate-x-[2px] hover:-translate-y-[2px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-pixel-none ${tone === 'solid' ? 'bg-accent text-paper' : 'bg-paper text-ink'}`;
   if (to) {
     return <Link to={to} className={cls}>{children}</Link>;
   }
@@ -64,6 +80,7 @@ export function WorkDetail({ slug: slugProp } = {}) {
   const sectionEls = useRef({});
   const panelEls = useRef({});
   const rootRef = useRef(null);
+  const titleRef = useRef(null);
   const scrollElRef = useRef(null);
   const progressFillRef = useRef(null);
   const [activeSection, setActiveSection] = useState('challenge');
@@ -156,7 +173,11 @@ export function WorkDetail({ slug: slugProp } = {}) {
         stagger: 0.08
       });
     }, rootRef);
-    return () => ctx.revert();
+    const split = revealChars(titleRef.current, { delay: 0.1, stagger: 0.025 });
+    return () => {
+      split?.revert();
+      ctx.revert();
+    };
 
   }, [project?.slug]);
 
@@ -196,7 +217,7 @@ export function WorkDetail({ slug: slugProp } = {}) {
         <p data-reveal className="font-mono text-lg uppercase text-accent">
           {project.category} <span className="text-ink/40">&middot; {project.year}</span>
         </p>
-        <h1 data-reveal className="mt-3 font-handjet text-6xl uppercase leading-[0.85] tracking-tight sm:text-7xl">
+        <h1 ref={titleRef} className="mt-3 font-handjet text-6xl uppercase leading-[0.85] tracking-tight sm:text-7xl">
           {project.title}
         </h1>
 

@@ -161,7 +161,11 @@ body {
   .shadow-pixel-sm,
   .shadow-pixel-lg,
   .shadow-pixel-accent {
-    box-shadow: var(--px-edge, 0 0 #0000), var(--px-drop, 0 0 #0000);
+    /* Reset first: custom properties inherit, and an element must never pick
+       up its parent window's edge or drop shadow. Later rules opt back in. */
+    --px-edge: 0 0 #0000;
+    --px-drop: 0 0 #0000;
+    box-shadow: var(--px-edge), var(--px-drop);
   }
 
   .bevel {

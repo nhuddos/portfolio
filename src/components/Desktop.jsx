@@ -9,6 +9,7 @@ import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
 import { Field } from './Field';
+import { pixelBurst, wiggle } from '../motion';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
 function getTimeOfDay(date = new Date()) {
   const hour = date.getHours();
@@ -161,7 +162,7 @@ export function Desktop() {
   };
   const renderIcon = (app) => {
     const isRunning = windows.some((w) => w.id === app.id);
-    return (<button key={app.id} data-icon onClick={(e) => launch(app.id, e.currentTarget)} aria-label={`Open ${app.label}`} className={`group flex shrink-0 items-center gap-1.5 focus:outline-none ${isNarrow ? 'flex-row' : 'w-full flex-col text-center'}`}>
+    return (<button key={app.id} data-icon onClick={(e) => launch(app.id, e.currentTarget)} onMouseEnter={(e) => wiggle(e.currentTarget.firstElementChild)} aria-label={`Open ${app.label}`} className={`group flex shrink-0 items-center gap-1.5 focus:outline-none ${isNarrow ? 'flex-row' : 'w-full flex-col text-center'}`}>
 
       <app.icon
         size={isNarrow ? 40 : 64}
@@ -195,7 +196,14 @@ export function Desktop() {
         </p>
       </div>}
   </>;
-  return (<div className="relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period}>
+  /* Clicking bare desktop (not a window, icon or the dock) throws pixel confetti. */
+  const onDesktopPointerDown = (e) => {
+    if (e.target.closest('section, button, a, input, [data-taskbar], [data-icon]')) return;
+    if (!e.target.closest('[data-desktop-surface]')) return;
+    pixelBurst(e.clientX, e.clientY);
+  };
+
+  return (<div className="relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period} data-desktop-surface onPointerDown={onDesktopPointerDown}>
     <Field />
     {!booted && <BootScreen onReveal={revealDesktop} onComplete={completeBoot} />}
 

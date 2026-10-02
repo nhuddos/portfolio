@@ -13,6 +13,8 @@ import {
 import { useScreenInit } from '../useScreenInit.js';
 import { CONTACT_LINKS, resolveLogoSrc } from '../data/contactLinks.js';
 import { asset } from '../assetUrl.js';
+import gsap from 'gsap';
+import { reducedMotion, useEntrance, wiggle } from '../motion';
 
 const toolGroups = [
   {
@@ -154,7 +156,7 @@ function Bubble({ time, tone = 'paper', wide = false, animate, children }) {
   return (
     <Pop animate={animate}>
       <div className={`max-w-[88%] ${wide ? 'sm:max-w-lg' : 'sm:max-w-md'}`}>
-        <div className={`bevel px-4 py-3 shadow-pixel ${toneClasses[tone]}`}>
+        <div className={`bevel px-4 py-3 ${toneClasses[tone]}`}>
           {children}
         </div>
         <div className="mt-1.5 font-mono text-sm max-md:text-[18px] uppercase text-ink/40">{time}</div>
@@ -168,7 +170,7 @@ function PhotoBubble({ src, alt, time, animate }) {
     <Pop animate={animate}>
       <div className="max-w-[70%] sm:max-w-xs">
         <div
-          className="overflow-hidden bevel shadow-pixel"
+          className="overflow-hidden bevel  "
           style={{ background: 'linear-gradient(160deg, var(--checker-a), var(--checker-b))' }}
         >
           <img src={src} alt={alt} className="pixelated w-full object-cover" />
@@ -180,6 +182,14 @@ function PhotoBubble({ src, alt, time, animate }) {
 }
 
 function TypingBubble({ name }) {
+  const dotsRef = useRef(null);
+  /* Three pixels doing a little wave while Khanh "types". */
+  useEffect(() => {
+    const dots = dotsRef.current?.children;
+    if (!dots || reducedMotion()) return undefined;
+    const tween = gsap.to(dots, { y: -5, duration: 0.3, ease: 'power1.inOut', stagger: { each: 0.12, repeat: -1, yoyo: true } });
+    return () => tween.kill();
+  }, []);
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -189,28 +199,44 @@ function TypingBubble({ name }) {
       role="status"
       aria-label={`${name} is typing`}
     >
-      <div className="flex items-center gap-1.5 bevel bg-paper px-4 py-3.5 shadow-pixel">
+      <div ref={dotsRef} className="flex items-center gap-1.5 bevel bg-paper px-4 py-3.5">
         {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className="h-2 w-2 bg-ink"
-            style={{ animation: 'blink 1s steps(1) infinite', animationDelay: `${-i * 0.25}s` }}
-          />
+          <span key={i} className="h-2 w-2 bg-ink" />
         ))}
       </div>
     </motion.div>
   );
 }
 
-function Highlighted({ text }) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith('**') && part.endsWith('**') ? (
-      <mark key={i} className="bg-accent-2 px-1 text-ink">
-        {part.slice(2, -2)}
-      </mark>
-    ) : (
-      part
-    )
+const highlight = {
+  backgroundImage: 'linear-gradient(var(--accent-2), var(--accent-2))',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: '100% 100%'
+};
+
+/* Key phrases get swiped with a pixel highlighter as the message lands. */
+function Highlighted({ text, animate }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const marks = ref.current?.querySelectorAll('mark');
+    if (!animate || !marks?.length || reducedMotion()) return undefined;
+    const tween = gsap.fromTo(marks, { backgroundSize: '0% 100%' }, {
+      backgroundSize: '100% 100%', duration: 0.45, ease: 'steps(8)', stagger: 0.3, delay: 0.35
+    });
+    return () => tween.kill();
+  }, [animate]);
+  return (
+    <span ref={ref}>
+      {text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+        part.startsWith('**') && part.endsWith('**') ? (
+          <mark key={i} className="bg-transparent px-1 text-ink" style={highlight}>
+            {part.slice(2, -2)}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </span>
   );
 }
 
@@ -222,7 +248,7 @@ function ChatMessage({ msg, time, animate }) {
       return (
         <Bubble time={time} animate={animate}>
           <p className="font-body text-[16px] leading-relaxed">
-            <Highlighted text={msg.text} />
+            <Highlighted text={msg.text} animate={animate} />
           </p>
         </Bubble>
       );
@@ -361,6 +387,8 @@ export function About() {
   const progressRef = useRef({});
   const [mobileView, setMobileView] = useState('list');
   const activeRoom = rooms.find((r) => r.id === activeId) ?? rooms[0];
+  const rootRef = useRef(null);
+  useEntrance(rootRef);
 
   const selectRoom = (id) => {
     setActiveId(id);
@@ -368,12 +396,12 @@ export function About() {
   };
 
   return (
-    <div className="flex h-full min-h-0">
+    <div ref={rootRef} className="flex h-full min-h-0">
       <aside
         className={`${mobileView === 'chat' ? 'hidden' : 'flex'} w-full shrink-0 flex-col border-r-2 border-ink bg-paper sm:flex sm:w-64`}
       >
         <div className="shrink-0 border-b-2 border-ink px-3 py-2.5 sm:px-4 sm:py-3">
-          <p className="font-mono text-[24px] uppercase leading-none">Chats</p>
+          <p data-split className="font-mono text-[24px] uppercase leading-none">Chats</p>
         </div>
         <nav className="min-h-0 flex-1 overflow-y-auto" aria-label="Chatrooms">
           {rooms.map((room) => {
@@ -381,7 +409,9 @@ export function About() {
             return (
               <button
                 key={room.id}
+                data-anim
                 onClick={() => selectRoom(room.id)}
+                onMouseEnter={(e) => wiggle(e.currentTarget.firstElementChild)}
                 aria-current={isActive}
                 className={`flex w-full items-center gap-2.5 border-b-2 border-ink/10 px-3 py-3 text-left sm:gap-3 sm:px-4 ${isActive ? 'bg-accent-2/40' : 'hover:bg-accent-2/15'}`}
               >
