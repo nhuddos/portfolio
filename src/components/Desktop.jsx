@@ -60,14 +60,13 @@ export function Desktop() {
     if (!revealed || !dock)
       return;
     const ctx = gsap.context(() => {
-      gsap.fromTo('[data-icon]', { opacity: 0, y: 14, filter: 'blur(6px)' }, {
+      gsap.fromTo('[data-icon]', { opacity: 0, x: -24, scale: 0.8 }, {
         opacity: 1,
-        y: 0,
-        filter: 'blur(0px)',
-        duration: 0.7,
-        ease: 'expo.out',
-        stagger: 0.06,
-        clearProps: 'filter'
+        x: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: 'back.out(2)',
+        stagger: 0.07
       });
     }, dock);
     return () => ctx.revert();
@@ -142,22 +141,6 @@ export function Desktop() {
     }
     open(id, { title: titleFor(id), size: appRegistry[id]?.size, anchor: appRegistry[id]?.anchor });
   };
-  /* A frosted tile tinted with the app's colour, used for every launcher. */
-  const iconTile = (app, size) => (
-    <span
-      className="relative grid place-items-center overflow-hidden rounded-[22%] border border-ink/10 shadow-soft transition-transform duration-300 ease-out-expo group-hover:-translate-y-1 group-hover:shadow-float group-active:scale-95"
-      style={{
-        width: size,
-        height: size,
-        background: `linear-gradient(145deg, color-mix(in srgb, ${app.tint} 32%, var(--paper)), color-mix(in srgb, ${app.tint} 8%, var(--paper)))`
-      }}
-    >
-      <app.icon size={Math.round(size * 0.42)} strokeWidth={1.6} style={{ color: `color-mix(in srgb, ${app.tint} 70%, var(--ink))` }} />
-    </span>
-  );
-  const runningDot = (isRunning) => (
-    <span className={`h-1 w-1 rounded-full bg-ink transition-opacity ${isRunning ? 'opacity-70' : 'opacity-0'}`} aria-hidden />
-  );
   const renderMobileTile = (app) => {
     const isRunning = windows.some((w) => w.id === app.id);
     return (<button key={app.id} data-tile onClick={(e) => {
@@ -165,20 +148,30 @@ export function Desktop() {
       setMobileMenuOpen(false);
     }} aria-label={`Open ${app.label}`} className="group flex flex-col items-center gap-2 text-center focus:outline-none">
 
-      {iconTile(app, 64)}
-      <span className="text-[13px] font-medium leading-none text-ink">{app.label}</span>
-      {runningDot(isRunning)}
+      <app.icon
+        size={64}
+        style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
+        className="[filter:drop-shadow(3px_3px_0_var(--ink))] transition-transform group-active:scale-90"
+      />
+      <span className={`px-1 font-mono text-lg leading-none group-focus-visible:bg-ink group-focus-visible:text-paper ${isRunning ? 'bg-ink text-paper' : 'text-ink'}`}>
+
+        {app.label}
+      </span>
     </button>);
   };
   const renderIcon = (app) => {
     const isRunning = windows.some((w) => w.id === app.id);
-    return (<button key={app.id} data-icon onClick={(e) => launch(app.id, e.currentTarget)} aria-label={`Open ${app.label}`} className="group flex w-full shrink-0 flex-col items-center gap-2 text-center focus:outline-none">
+    return (<button key={app.id} data-icon onClick={(e) => launch(app.id, e.currentTarget)} aria-label={`Open ${app.label}`} className={`group flex shrink-0 items-center gap-1.5 focus:outline-none ${isNarrow ? 'flex-row' : 'w-full flex-col text-center'}`}>
 
-      {iconTile(app, 56)}
-      <span className="rounded-full px-2 py-0.5 text-[12px] font-medium leading-none text-ink/80 group-hover:text-ink group-focus-visible:bg-ink group-focus-visible:text-paper">
+      <app.icon
+        size={isNarrow ? 40 : 64}
+        style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
+        className="transition-transform duration-150 [filter:drop-shadow(3px_3px_0_var(--ink))] group-hover:-translate-y-1 group-active:translate-y-0.5"
+      />
+      <span className={`px-1.5 py-0.5 font-mono text-lg leading-none transition-colors group-hover:bg-ink group-hover:text-paper group-focus-visible:bg-ink group-focus-visible:text-paper ${isRunning ? 'bg-accent text-ink' : 'bg-paper/70 text-ink'}`}>
+
         {app.label}
       </span>
-      {runningDot(isRunning)}
     </button>);
   };
 
@@ -197,10 +190,9 @@ export function Desktop() {
 
     {revealed && windows.length === 0 &&
       <div className="flex h-full items-center justify-center">
-        <div className="text-center">
-          <p className="font-display text-4xl italic text-ink/80 sm:text-5xl">Wander around.</p>
-          <p className="eyebrow mt-4 text-ink/50">Pick an app to begin exploring</p>
-        </div>
+        <p className="bevel bg-paper/80 px-4 py-3 font-mono text-lg uppercase text-ink/70">
+          Click a shortcut to open a window
+        </p>
       </div>}
   </>;
   return (<div className="relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period}>
@@ -209,19 +201,18 @@ export function Desktop() {
 
     {isNarrow ? (
       <div className="relative flex min-h-0 flex-1 flex-col">
-        <div ref={dockRef} className="glass relative z-10 mx-2 mt-2 flex shrink-0 items-center justify-between gap-2 rounded-2xl px-2 py-2">
-          <button data-icon onClick={() => setMobileMenuOpen(true)} aria-label="Open apps menu" aria-expanded={mobileMenuOpen} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink hover:bg-ink/5 active:scale-95">
+        <div ref={dockRef} className="relative z-10 m-2 mb-0 flex shrink-0 items-center justify-between gap-2 bevel bg-paper px-2.5 py-2">
+          <button data-icon onClick={() => setMobileMenuOpen(true)} aria-label="Open apps menu" aria-expanded={mobileMenuOpen} className="grid h-12 w-12 shrink-0 place-items-center bevel bg-paper text-ink active:translate-y-0.5">
 
-            <MenuIcon size={20} strokeWidth={1.75} />
+            <MenuIcon size={22} strokeWidth={2.5} />
           </button>
-          <span className="font-display text-xl italic leading-none text-ink">Khanh Do</span>
-          <div className="flex shrink-0 items-center gap-1">
-            {CONTACT_LINKS.slice(0, 2).map((link) => (
-              <a key={link.id} href={link.href} target="_blank" rel="noreferrer" aria-label={link.label} className="grid h-11 w-11 place-items-center rounded-xl text-ink hover:bg-ink/5">
+          <div className="flex shrink-0 items-center gap-1.5">
+            {CONTACT_LINKS.map((link) => (
+              <a key={link.id} href={link.href} target="_blank" rel="noreferrer" aria-label={link.label} className="grid h-11 w-11 place-items-center bevel bg-paper text-ink hover:bg-accent">
 
                 {link.icon === 'mail' ?
-                  <MailIcon size={18} strokeWidth={1.75} /> :
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-white"><img src={resolveLogoSrc(link.logo)} alt="" aria-hidden="true" className="h-3.5 w-3.5 object-contain" /></span>}
+                  <MailIcon size={17} /> :
+                  <img src={resolveLogoSrc(link.logo)} alt="" aria-hidden="true" className="h-4 w-4 object-contain" />}
               </a>
             ))}
           </div>
@@ -231,21 +222,18 @@ export function Desktop() {
         </div>
 
         {mobileMenuOpen &&
-          <div className="glass-strong absolute inset-0 z-50 flex flex-col !border-0" onClick={(e) => {
+          <div className="absolute inset-0 z-50 flex flex-col bg-paper" onClick={(e) => {
             if (e.target === e.currentTarget) setMobileMenuOpen(false);
           }}>
 
-            <div className="flex shrink-0 items-center justify-between px-5 pb-2 pt-4">
-              <div>
-                <p className="eyebrow text-ink/50">Portfolio</p>
-                <p className="mt-1.5 font-display text-3xl italic leading-none text-ink">Khanh Do</p>
-              </div>
-              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close apps menu" className="grid h-11 w-11 place-items-center rounded-full border border-ink/10 text-ink hover:bg-ink/5 active:scale-95">
+            <div className="flex shrink-0 items-center justify-between border-b-2 border-ink/10 bg-paper px-4 py-3">
+              <span className="font-mono text-2xl text-ink">NHUDDOS&nbsp;OS</span>
+              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close apps menu" className="grid h-12 w-12 place-items-center bevel bg-paper text-ink active:translate-y-0.5">
 
-                <XIcon size={18} strokeWidth={1.75} />
+                <XIcon size={20} strokeWidth={2.5} />
               </button>
             </div>
-            <div ref={mobileMenuRef} className="grid flex-1 auto-rows-min grid-cols-4 gap-x-3 gap-y-7 overflow-y-auto p-5" aria-label="Apps">
+            <div ref={mobileMenuRef} className="grid flex-1 auto-rows-min grid-cols-4 gap-x-3 gap-y-8 overflow-y-auto p-5" aria-label="Apps">
 
               {desktopApps.map(renderMobileTile)}
             </div>
@@ -253,18 +241,18 @@ export function Desktop() {
       </div>) : (
       <div className="relative min-h-0 flex-1">
         <div ref={dockRef} className="contents">
-          <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-28 flex-col items-center gap-6 py-8" aria-label="Desktop shortcuts">
+          <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-28 flex-col items-center gap-9 py-6" aria-label="Desktop shortcuts">
 
             {leftIcons}
           </aside>
 
           {rightIcons.length > 0 &&
-            <aside className="absolute bottom-0 right-0 top-0 z-10 flex w-28 flex-col items-center gap-6 py-8" aria-label="Desktop shortcuts (right)">
+            <aside className="absolute bottom-0 right-0 top-0 z-10 flex w-28 flex-col items-center gap-9 py-6" aria-label="Desktop shortcuts (right)">
 
               {rightIcons}
             </aside>}
         </div>
-        <div className="pointer-events-none absolute inset-0 z-20 p-4">
+        <div className="pointer-events-none absolute inset-0 z-20 p-3">
           <div data-window-area className="relative h-full w-full [&>section]:pointer-events-auto">
             {windowLayer}
           </div>
@@ -272,5 +260,6 @@ export function Desktop() {
       </div>)}
 
     <Taskbar onRestart={restart} />
+
   </div>);
 }

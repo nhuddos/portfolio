@@ -20,23 +20,18 @@ export default {
         lilac: 'rgb(var(--lilac-rgb) / <alpha-value>)',
         sky: 'rgb(var(--sky-rgb) / <alpha-value>)',
         muted: 'rgb(var(--muted-rgb) / <alpha-value>)',
-        /* Text that sits on an accent fill (buttons, active chips). */
-        'on-accent': 'rgb(var(--on-accent-rgb) / <alpha-value>)',
       },
       fontFamily: {
-        /* Geist carries the interface, Geist Mono the metadata/labels,
-           and Instrument Serif the expressive display moments. */
-        sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        body: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
-        display: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+        sans: ['VT323', 'monospace'],
+        vt323: ['VT323', 'monospace'],
+        handjet: ['Handjet', 'cursive'],
+        /* Used for long-form body copy (bios, project summaries, etc.)
+           so paragraphs stay readable while headings/labels/buttons
+           keep the pixel/mono retro look via font-mono / font-mono. */
+        body: ['Instrument Sans', 'sans-serif'],
       },
-      boxShadow: {
-        soft: '0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 4px 16px -4px rgb(var(--shadow-rgb) / 0.10)',
-        float: '0 1px 2px rgb(var(--shadow-rgb) / 0.08), 0 12px 32px -8px rgb(var(--shadow-rgb) / 0.22), 0 32px 80px -24px rgb(var(--shadow-rgb) / 0.28)',
-      },
-      transitionTimingFunction: {
-        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      borderWidth: {
+        3: '3px',
       },
     },
   },

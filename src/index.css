@@ -1,94 +1,107 @@
+
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/*
-  Palette tokens. The site re-themes itself with the visitor's time of day:
-  a fresh sage morning, a golden afternoon and a dark indigo night. Every
-  colour in the UI is derived from these variables, so components only ever
-  speak in roles (paper = surface, ink = foreground, accent = action).
-*/
-:root,
+
+:root {
+  --paper: #f2ecd6;
+  --ink: #1d3a3a;
+  --accent: #e2a542;
+  --accent-2: #f0d27a;
+  --mint: #7ec49f;
+  --lilac: #3f7a80;
+  --sky: #b7d9d6;
+  --muted: #86a39c;
+  --bevel-light: #f8f1da;
+  --bevel-dark: #2b5450;
+
+  --checker-a: #f4efd9;
+  --checker-b: #e6ede0;
+
+  --paper-rgb: 242 236 214;
+  --ink-rgb: 29 58 58;
+  --accent-rgb: 226 165 66;
+  --accent-2-rgb: 240 210 122;
+  --mint-rgb: 126 196 159;
+  --lilac-rgb: 63 122 128;
+  --sky-rgb: 183 217 214;
+  --muted-rgb: 134 163 156;
+}
+
+/* Morning — pastel teal-green field, soft gold light, pale sky */
 [data-time-of-day='morning'] {
-  --paper: #f6f5f0;
-  --ink: #14211f;
-  --accent: #e8793a;
-  --accent-2: #f3cf74;
-  --mint: #8cc9a6;
-  --lilac: #2e6f72;
-  --sky: #cfe4e0;
-  --muted: #8b9c97;
-  --field: #dde8e2;
+  --paper: #f2ecd6;
+  --ink: #1d3a3a;
+  --accent: #e2a542;
+  --accent-2: #f0d27a;
+  --mint: #7ec49f;
+  --lilac: #3f7a80;
+  --sky: #b7d9d6;
+  --muted: #86a39c;
+  --bevel-light: #f8f1da;
+  --bevel-dark: #2b5450;
+  --checker-a: #f4efd9;
+  --checker-b: #dae7cf;
 
-  --paper-rgb: 246 245 240;
-  --ink-rgb: 20 33 31;
-  --accent-rgb: 232 121 58;
-  --accent-2-rgb: 243 207 116;
-  --mint-rgb: 140 201 166;
-  --lilac-rgb: 46 111 114;
-  --sky-rgb: 207 228 224;
-  --muted-rgb: 139 156 151;
-  --on-accent-rgb: 20 33 31;
-  --shadow-rgb: 20 40 36;
-
-  --grain-blend: multiply;
-  --grain-opacity: 0.07;
-  color-scheme: light;
+  --paper-rgb: 242 236 214;
+  --ink-rgb: 29 58 58;
+  --accent-rgb: 226 165 66;
+  --accent-2-rgb: 240 210 122;
+  --mint-rgb: 126 196 159;
+  --lilac-rgb: 63 122 128;
+  --sky-rgb: 183 217 214;
+  --muted-rgb: 134 163 156;
 }
 
+/* Afternoon — golden-hour field, vivid sunset orange, bright teal accent */
 [data-time-of-day='afternoon'] {
-  --paper: #fbf6ee;
-  --ink: #24170c;
-  --accent: #f25c27;
-  --accent-2: #ffc247;
-  --mint: #c4d46a;
-  --lilac: #1d7b7c;
-  --sky: #ffd7a8;
-  --muted: #b39773;
-  --field: #f6e3c8;
+  --paper: #fbead2;
+  --ink: #2a1c10;
+  --accent: #ff7a30;
+  --accent-2: #ffc93c;
+  --mint: #c9d94f;
+  --lilac: #1f8a8a;
+  --sky: #ffdca6;
+  --muted: #c9a468;
+  --bevel-light: #fff1dc;
+  --bevel-dark: #4a2f14;
+  --checker-a: #fdf0da;
+  --checker-b: #ffd9a0;
 
-  --paper-rgb: 251 246 238;
-  --ink-rgb: 36 23 12;
-  --accent-rgb: 242 92 39;
-  --accent-2-rgb: 255 194 71;
-  --mint-rgb: 196 212 106;
-  --lilac-rgb: 29 123 124;
-  --sky-rgb: 255 215 168;
-  --muted-rgb: 179 151 115;
-  --on-accent-rgb: 36 23 12;
-  --shadow-rgb: 70 36 10;
-
-  --grain-blend: multiply;
-  --grain-opacity: 0.07;
-  color-scheme: light;
+  --paper-rgb: 251 234 210;
+  --ink-rgb: 42 28 16;
+  --accent-rgb: 255 122 48;
+  --accent-2-rgb: 255 201 60;
+  --mint-rgb: 201 217 79;
+  --lilac-rgb: 31 138 138;
+  --sky-rgb: 255 220 166;
+  --muted-rgb: 201 164 104;
 }
 
-/* Night flips the roles: paper becomes a deep indigo surface. */
+/* Night — indigo sky, magenta-pink clouds, ember-orange hillside */
 [data-time-of-day='night'] {
-  --paper: #17151f;
-  --ink: #ece9f4;
-  --accent: #ff6b52;
-  --accent-2: #e27bbd;
-  --mint: #6fa6c9;
-  --lilac: #8b7fd6;
-  --sky: #3a3266;
-  --muted: #8c86a8;
-  --field: #0f0d18;
+  --paper: #e9e0ef;
+  --ink: #1a1430;
+  --accent: #f0553f;
+  --accent-2: #d968a8;
+  --mint: #3d6b8a;
+  --lilac: #4a3d7a;
+  --sky: #6a5a9e;
+  --muted: #8078a0;
+  --bevel-light: #ded0ef;
+  --bevel-dark: #241a3d;
+  --checker-a: #ece3f2;
+  --checker-b: #ddd0e8;
 
-  --paper-rgb: 23 21 31;
-  --ink-rgb: 236 233 244;
-  --accent-rgb: 255 107 82;
-  --accent-2-rgb: 226 123 189;
-  --mint-rgb: 111 166 201;
-  --lilac-rgb: 139 127 214;
-  --sky-rgb: 58 50 102;
-  --muted-rgb: 140 134 168;
-  --on-accent-rgb: 23 21 31;
-  --shadow-rgb: 0 0 0;
-
-  --grain-blend: soft-light;
-  --grain-opacity: 0.12;
-  color-scheme: dark;
+  --paper-rgb: 233 224 239;
+  --ink-rgb: 26 20 48;
+  --accent-rgb: 240 85 63;
+  --accent-2-rgb: 217 104 168;
+  --mint-rgb: 61 107 138;
+  --lilac-rgb: 74 61 122;
+  --sky-rgb: 106 90 158;
+  --muted-rgb: 128 120 160;
 }
 
 html,
@@ -98,123 +111,105 @@ body,
 }
 
 body {
-  background-color: var(--field);
+  background-color: var(--checker-a);
   color: var(--ink);
-  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  font-feature-settings: 'ss01', 'cv11';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'VT323', monospace;
   overflow: hidden;
-  transition: background-color 0.6s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
-::selection {
-  background: rgb(var(--accent-rgb) / 0.85);
-  color: rgb(var(--on-accent-rgb));
-}
-
-:focus-visible {
-  outline: 2px solid rgb(var(--accent-rgb));
-  outline-offset: 2px;
-}
-
-/* Crisp scaling for the pixel-art wallpapers. */
+/* Crisp pixel-perfect image scaling */
 .pixelated {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
 
-/* Small uppercase metadata label: "category · year", section eyebrows. */
-.eyebrow {
-  font-family: 'Geist Mono', ui-monospace, monospace;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  line-height: 1;
+.font-pixel,
+.font-handjet {
+  font-family: "Handjet", sans-serif;
+  font-weight: 900;
+  /* Black weight, per the Handjet variable font's 400..900 range. */
 }
 
-/* ---------- Surfaces ---------- */
-
-/* Frosted glass used by windows, the dock and floating menus. */
-.glass {
-  background-color: rgb(var(--paper-rgb) / 0.72);
-  -webkit-backdrop-filter: blur(24px) saturate(1.5);
-  backdrop-filter: blur(24px) saturate(1.5);
-  border: 1px solid rgb(var(--ink-rgb) / 0.08);
+.font-mono,
+.font-vt323 {
+  font-family: "VT323", monospace;
+  font-weight: 400;
 }
 
-.glass-strong {
-  background-color: rgb(var(--paper-rgb) / 0.88);
-  -webkit-backdrop-filter: blur(32px) saturate(1.6);
-  backdrop-filter: blur(32px) saturate(1.6);
-  border: 1px solid rgb(var(--ink-rgb) / 0.08);
+.font-body {
+  font-family: "Instrument Sans", sans-serif;
+  font-weight: 400;
 }
 
-.hairline {
-  border-color: rgb(var(--ink-rgb) / 0.08);
+::selection {
+  background: var(--accent);
+  color: var(--paper);
 }
 
-/* ---------- The desktop field ---------- */
+/*
+  Pixel edges. Instead of the old 3D bevel, every framed element gets a
+  crisp 2px ink outline with notched (missing) corner pixels, drawn with
+  box-shadows so it never shifts layout. Edge and drop shadow live in two
+  variables so .bevel and .shadow-pixel* compose instead of overriding.
+*/
+@layer utilities {
+  .bevel,
+  .bevel-in,
+  .shadow-pixel,
+  .shadow-pixel-sm,
+  .shadow-pixel-lg,
+  .shadow-pixel-accent {
+    box-shadow: var(--px-edge, 0 0 #0000), var(--px-drop, 0 0 #0000);
+  }
 
-/* Slowly drifting colour blooms behind everything. */
-@keyframes drift-a {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(6vw, 4vh, 0) scale(1.12); }
+  .bevel {
+    --px-edge: 0 -2px 0 0 var(--ink), 0 2px 0 0 var(--ink), -2px 0 0 0 var(--ink), 2px 0 0 0 var(--ink);
+  }
+
+  /* Pressed / sunken: same outline plus an inner shade on the top-left. */
+  .bevel-in {
+    --px-edge: inset 2px 2px 0 0 rgb(var(--ink-rgb) / 0.18), 0 -2px 0 0 var(--ink), 0 2px 0 0 var(--ink), -2px 0 0 0 var(--ink), 2px 0 0 0 var(--ink);
+  }
+
+  /* Hard offset drop shadows with a stepped corner. */
+  .shadow-pixel-sm {
+    --px-drop: 3px 2px 0 0 var(--ink), 2px 3px 0 0 var(--ink);
+  }
+
+  .shadow-pixel {
+    --px-drop: 5px 3px 0 0 var(--ink), 3px 5px 0 0 var(--ink);
+  }
+
+  .shadow-pixel-lg {
+    --px-drop: 9px 6px 0 0 var(--ink), 6px 9px 0 0 var(--ink);
+  }
+
+  .shadow-pixel-accent {
+    --px-drop: 5px 3px 0 0 var(--accent), 3px 5px 0 0 var(--accent);
+  }
+
+  .shadow-pixel-none {
+    --px-drop: 0 0 #0000;
+  }
+
+  /* 50% ordered dither, for quiet fills (unfocused title bars, tracks). */
+  .dither {
+    background-image: conic-gradient(rgb(var(--ink-rgb) / 0.14) 25%, transparent 0 50%, rgb(var(--ink-rgb) / 0.14) 0 75%, transparent 0);
+    background-size: 4px 4px;
+  }
 }
 
-@keyframes drift-b {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
-  50% { transform: translate3d(-5vw, -6vh, 0) scale(0.92); }
-}
-
-@keyframes drift-c {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.95); }
-  50% { transform: translate3d(4vw, -3vh, 0) scale(1.1); }
-}
-
-.bloom {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(80px);
-  opacity: 0.75;
-  will-change: transform;
-}
-
-.bloom-a { animation: drift-a 26s ease-in-out infinite; }
-.bloom-b { animation: drift-b 32s ease-in-out infinite; }
-.bloom-c { animation: drift-c 38s ease-in-out infinite; }
-
-[data-time-of-day='night'] .bloom {
-  opacity: 0.45;
-}
-
-/* Faint coordinate grid, fading out toward the edges. */
-.field-grid {
-  background-image: radial-gradient(rgb(var(--ink-rgb) / 0.16) 1px, transparent 1.2px);
-  background-size: 28px 28px;
-  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 30%, transparent 100%);
-  mask-image: radial-gradient(ellipse 75% 70% at 50% 45%, #000 30%, transparent 100%);
-}
-
-/* Film grain for a tactile, printed feel. */
-.grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: var(--grain-blend);
-  opacity: var(--grain-opacity);
-}
-
-/* ---------- Scrollbars ---------- */
-
+/* Flat pixel scrollbar: square thumb, no arrow buttons. */
 .window-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgb(var(--ink-rgb) / 0.18) transparent;
+  scrollbar-color: rgb(var(--ink-rgb) / 0.35) transparent;
 }
 
 .window-scroll::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 .window-scroll::-webkit-scrollbar-track {
@@ -222,34 +217,29 @@ body {
 }
 
 .window-scroll::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--ink-rgb) / 0.16);
-  border: 3px solid transparent;
-  border-radius: 9999px;
-  background-clip: padding-box;
+  background-color: rgb(var(--ink-rgb) / 0.3);
+  border: 3px solid var(--paper);
 }
 
 .window-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(var(--ink-rgb) / 0.32);
+  background-color: var(--accent);
 }
 
-/* ---------- Motion ---------- */
-
+/* Blinking pixel cursor */
 @keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
-.caret-blink {
+.pixel-blink {
   animation: blink 1s steps(1) infinite;
-}
-
-@keyframes typing-dot {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
-  30% { transform: translateY(-3px); opacity: 1; }
-}
-
-.typing-dot {
-  animation: typing-dot 1.2s ease-in-out infinite;
 }
 
 /* Window drag affordance */
@@ -262,9 +252,20 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bloom,
-  .caret-blink,
-  .typing-dot {
+  .pixel-blink {
     animation: none;
   }
+}
+
+html,
+body {
+  cursor: var(--cursor-arrow, default);
+}
+
+:root :is(a, button:not(:disabled), select, summary, label, [role='button'], [role='tab'], input[type='range'], input[type='checkbox'], input[type='radio'], .cursor-pointer, [data-cursor-hover]) {
+  cursor: var(--cursor-hand, pointer);
+}
+
+:root :is(button:disabled, .cursor-default) {
+  cursor: var(--cursor-arrow, default);
 }

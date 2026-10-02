@@ -73,7 +73,7 @@ const rooms = [
     time: '20m',
     preview: '',
     icon: UserIcon,
-    color: 'bg-mint/40'
+    color: 'bg-mint'
   },
   {
     id: 'tools',
@@ -82,7 +82,7 @@ const rooms = [
     time: '5m',
     preview: '',
     icon: SettingsIcon,
-    color: 'bg-accent-2/50'
+    color: 'bg-accent-2'
   },
   {
     id: 'experience',
@@ -91,15 +91,15 @@ const rooms = [
     time: '3d',
     preview: '',
     icon: BriefcaseIcon,
-    color: 'bg-sky/80'
+    color: 'bg-sky'
   }
 ];
 
 const toneClasses = {
-  paper: 'bg-ink/[0.05] text-ink',
+  paper: 'bg-paper text-ink',
   mint: 'bg-mint/20 text-ink',
   accent2: 'bg-accent-2/25 text-ink',
-  sky: 'bg-sky/40 text-ink'
+  sky: 'bg-sky/30 text-ink'
 };
 
 const typingFor = (text) => Math.min(2200, Math.max(700, text.replace(/\*\*/g, '').length * 14));
@@ -127,11 +127,11 @@ const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function RoomAvatar({ room, size = 'md' }) {
-  const dims = size === 'lg' ? 'h-10 w-10' : 'h-9 w-9';
+  const dims = size === 'lg' ? 'h-11 w-11' : 'h-10 w-10';
   const Icon = room.icon;
   return (
-    <span className={`grid shrink-0 place-items-center rounded-full border border-ink/[0.06] ${room.color} text-ink ${dims}`}>
-      <Icon size={size === 'lg' ? 17 : 15} strokeWidth={1.75} />
+    <span className={`bevel grid shrink-0 place-items-center ${room.color} text-ink ${dims}`}>
+      <Icon size={size === 'lg' ? 18 : 16} strokeWidth={2.5} />
     </span>
   );
 }
@@ -141,7 +141,7 @@ function Pop({ animate, children }) {
     <motion.div
       initial={animate ? { opacity: 0, y: 12, scale: 0.96 } : false}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
       style={{ transformOrigin: 'bottom left' }}
       className="flex justify-start"
     >
@@ -154,10 +154,10 @@ function Bubble({ time, tone = 'paper', wide = false, animate, children }) {
   return (
     <Pop animate={animate}>
       <div className={`max-w-[88%] ${wide ? 'sm:max-w-lg' : 'sm:max-w-md'}`}>
-        <div className={`rounded-2xl rounded-bl-md px-4 py-3 ${toneClasses[tone]}`}>
+        <div className={`bevel px-4 py-3 shadow-pixel ${toneClasses[tone]}`}>
           {children}
         </div>
-        <div className="mt-1.5 pl-1 font-mono text-[10px] text-ink/35">{time}</div>
+        <div className="mt-1.5 font-mono text-sm max-md:text-[18px] uppercase text-ink/40">{time}</div>
       </div>
     </Pop>
   );
@@ -168,12 +168,12 @@ function PhotoBubble({ src, alt, time, animate }) {
     <Pop animate={animate}>
       <div className="max-w-[70%] sm:max-w-xs">
         <div
-          className="overflow-hidden rounded-2xl rounded-bl-md border border-ink/[0.06]"
-          style={{ background: 'linear-gradient(160deg, var(--sky), var(--accent-2))' }}
+          className="overflow-hidden bevel shadow-pixel"
+          style={{ background: 'linear-gradient(160deg, var(--checker-a), var(--checker-b))' }}
         >
-          <img src={src} alt={alt} className="w-full object-cover" />
+          <img src={src} alt={alt} className="pixelated w-full object-cover" />
         </div>
-        <div className="mt-1.5 pl-1 font-mono text-[10px] text-ink/35">{time}</div>
+        <div className="mt-1.5 font-mono text-sm max-md:text-[18px] uppercase text-ink/40">{time}</div>
       </div>
     </Pop>
   );
@@ -189,12 +189,12 @@ function TypingBubble({ name }) {
       role="status"
       aria-label={`${name} is typing`}
     >
-      <div className="flex items-center gap-1 rounded-2xl rounded-bl-md bg-ink/[0.05] px-4 py-4">
+      <div className="flex items-center gap-1.5 bevel bg-paper px-4 py-3.5 shadow-pixel">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="typing-dot h-1.5 w-1.5 rounded-full bg-ink"
-            style={{ animationDelay: `${i * 0.15}s` }}
+            className="h-2 w-2 bg-ink"
+            style={{ animation: 'blink 1s steps(1) infinite', animationDelay: `${-i * 0.25}s` }}
           />
         ))}
       </div>
@@ -205,7 +205,7 @@ function TypingBubble({ name }) {
 function Highlighted({ text }) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
     part.startsWith('**') && part.endsWith('**') ? (
-      <mark key={i} className="rounded bg-accent-2/45 px-1 text-ink">
+      <mark key={i} className="bg-accent-2 px-1 text-ink">
         {part.slice(2, -2)}
       </mark>
     ) : (
@@ -221,7 +221,7 @@ function ChatMessage({ msg, time, animate }) {
     case 'text':
       return (
         <Bubble time={time} animate={animate}>
-          <p className="text-[15px] leading-relaxed">
+          <p className="font-body text-[16px] leading-relaxed">
             <Highlighted text={msg.text} />
           </p>
         </Bubble>
@@ -229,16 +229,16 @@ function ChatMessage({ msg, time, animate }) {
     case 'tools':
       return (
         <Bubble time={time} tone="accent2" animate={animate}>
-          <p className="eyebrow mb-3 text-ink/50">
+          <p className="mb-2 font-mono text-sm max-md:text-[18px] uppercase tracking-wide text-ink/50">
             {msg.group.label}
           </p>
           <div className="flex flex-wrap gap-2">
             {msg.group.items.map((tool) => (
               <span
                 key={tool.name}
-                className="flex items-center gap-1.5 rounded-full border border-ink/10 bg-paper py-1 pl-1 pr-3 text-[12px] text-ink"
+                className="flex items-center gap-1.5 border border-ink/30 bg-paper px-2.5 py-1 font-mono text-sm max-md:text-[18px] uppercase text-ink"
               >
-                <span className="flex shrink-0 items-center -space-x-1">
+                <span className="flex shrink-0 items-center gap-0.5">
                   {tool.logos.map((entry) => (
                     <img
                       key={entry}
@@ -246,7 +246,7 @@ function ChatMessage({ msg, time, animate }) {
                       alt=""
                       aria-hidden="true"
                       loading="lazy"
-                      className="h-5 w-5 shrink-0 rounded-full bg-white object-contain p-[3px] ring-1 ring-ink/10"
+                      className="h-4 w-4 shrink-0 rounded-sm object-contain"
                     />
                   ))}
                 </span>
@@ -260,13 +260,13 @@ function ChatMessage({ msg, time, animate }) {
       return (
         <Bubble time={time} tone="sky" wide animate={animate}>
           <div className="flex items-start gap-3">
-            <span className="shrink-0 rounded-full border border-ink/15 px-2 py-1 font-mono text-[11px] leading-none text-ink/70">
+            <span className="shrink-0 border border-ink/30 bg-paper px-2 py-0.5 font-mono text-base max-md:text-[18px] leading-none">
               {msg.item.year}
             </span>
             <div className="min-w-0">
-              <p className="text-[15px] font-medium leading-snug">{msg.item.title}</p>
-              <p className="eyebrow mt-1.5 leading-snug text-ink/50">{msg.item.place}</p>
-              <p className="mt-2 text-[14px] leading-relaxed text-ink/75">
+              <p className="font-mono text-lg leading-snug">{msg.item.title}</p>
+              <p className="mt-1 font-mono text-sm max-md:text-[18px] uppercase text-ink/50">{msg.item.place}</p>
+              <p className="mt-1.5 font-body text-[15px] leading-relaxed text-ink/80">
                 {msg.item.desc}
               </p>
             </div>
@@ -337,10 +337,10 @@ function Conversation({ room, progressRef, onTyping }) {
   return (
     <div
       ref={scrollRef}
-      className="window-scroll min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-6 sm:px-6"
+      className="window-scroll min-h-0 flex-1 space-y-4 overflow-y-auto bg-sky/10 px-4 py-6 sm:px-6"
     >
       <div className="flex justify-center">
-        <span className="eyebrow rounded-full border border-ink/10 px-2.5 py-1.5 text-ink/45">
+        <span className="border border-ink/30 bg-paper px-2.5 py-0.5 font-mono text-sm max-md:text-[18px] uppercase text-ink/50">
           Today
         </span>
       </div>
@@ -370,13 +370,12 @@ export function About() {
   return (
     <div className="flex h-full min-h-0">
       <aside
-        className={`${mobileView === 'chat' ? 'hidden' : 'flex'} w-full shrink-0 flex-col border-r border-ink/[0.08] bg-ink/[0.02] sm:flex sm:w-64`}
+        className={`${mobileView === 'chat' ? 'hidden' : 'flex'} w-full shrink-0 flex-col border-r-2 border-ink bg-paper sm:flex sm:w-64`}
       >
-        <div className="shrink-0 px-4 pb-3 pt-5">
-          <p className="eyebrow text-ink/45">Inbox</p>
-          <p className="mt-2 font-display text-4xl italic leading-none">Chats</p>
+        <div className="shrink-0 border-b-2 border-ink px-3 py-2.5 sm:px-4 sm:py-3">
+          <p className="font-mono text-[24px] uppercase leading-none">Chats</p>
         </div>
-        <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2" aria-label="Chatrooms">
+        <nav className="min-h-0 flex-1 overflow-y-auto" aria-label="Chatrooms">
           {rooms.map((room) => {
             const isActive = room.id === activeRoom.id;
             return (
@@ -384,16 +383,16 @@ export function About() {
                 key={room.id}
                 onClick={() => selectRoom(room.id)}
                 aria-current={isActive}
-                className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors ${isActive ? 'bg-ink/[0.07]' : 'hover:bg-ink/[0.04]'}`}
+                className={`flex w-full items-center gap-2.5 border-b-2 border-ink/10 px-3 py-3 text-left sm:gap-3 sm:px-4 ${isActive ? 'bg-accent-2/40' : 'hover:bg-accent-2/15'}`}
               >
                 <RoomAvatar room={room} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="truncate text-[14px] font-medium leading-none">{room.label}</p>
-                    <span className="shrink-0 font-mono text-[10px] text-ink/40">{room.time}</span>
+                    <p className="truncate font-mono text-xl leading-none">{room.label}</p>
+                    <span className="shrink-0 font-mono text-sm max-md:text-[18px] text-ink/40">{room.time}</span>
                   </div>
-                  <p className="mt-1.5 truncate text-[12px] leading-none text-ink/50">
-                    {room.subtitle}
+                  <p className="mt-1.5 hidden truncate font-mono text-sm max-md:text-[18px] text-ink/50 sm:block">
+                    {room.preview}
                   </p>
                 </div>
               </button>
@@ -405,18 +404,18 @@ export function About() {
       <div
         className={`${mobileView === 'list' ? 'hidden' : 'flex'} min-w-0 flex-1 flex-col sm:flex`}
       >
-        <div className="flex shrink-0 items-center gap-3 border-b border-ink/[0.08] px-4 py-3 sm:px-5">
+        <div className="flex shrink-0 items-center gap-3 border-b-2 border-ink bg-paper px-4 py-3 sm:px-5">
           <button
             onClick={() => setMobileView('list')}
             aria-label="Back to chats"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-ink hover:bg-ink/5 sm:hidden"
+            className="grid h-9 w-9 shrink-0 place-items-center bevel bg-paper text-ink hover:bg-accent hover:text-paper sm:hidden"
           >
             <ArrowLeftIcon size={16} />
           </button>
           <RoomAvatar room={activeRoom} size="lg" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[15px] font-medium leading-none">{activeRoom.label}</p>
-            <p className={`mt-1.5 truncate text-[12px] leading-none ${isTyping ? 'text-accent' : 'text-ink/50'}`}>
+            <p className="truncate font-mono text-xl leading-none">{activeRoom.label}</p>
+            <p className="mt-1.5 truncate font-mono text-sm max-md:text-[18px] uppercase leading-none text-ink/50">
               {isTyping ? 'typing...' : activeRoom.subtitle}
             </p>
           </div>
@@ -428,19 +427,17 @@ export function About() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={link.label}
-                className="grid h-9 w-9 place-items-center rounded-full border border-ink/10 text-ink transition-transform hover:-translate-y-0.5 hover:border-ink/25"
+                className="grid h-9 w-9 place-items-center bevel bg-paper text-ink hover:bg-accent hover:text-paper"
               >
                 {link.icon === 'mail' ? (
-                  <MailIcon size={15} strokeWidth={1.75} />
+                  <MailIcon size={15} />
                 ) : (
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-white">
-                    <img
-                      src={resolveLogoSrc(link.logo)}
-                      alt=""
-                      aria-hidden="true"
-                      className="h-3.5 w-3.5 object-contain"
-                    />
-                  </span>
+                  <img
+                    src={resolveLogoSrc(link.logo)}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 object-contain"
+                  />
                 )}
               </a>
             ))}
@@ -454,8 +451,8 @@ export function About() {
           onTyping={setIsTyping}
         />
 
-        <div className="shrink-0 px-3 pb-3 sm:px-4 sm:pb-4">
-          <div className="flex cursor-not-allowed items-center gap-2 rounded-full border border-ink/10 bg-ink/[0.03] py-1.5 pl-4 pr-1.5">
+        <div className="shrink-0 border-t-2 border-ink bg-paper px-3 py-3 sm:px-4">
+          <div className="flex cursor-not-allowed items-center gap-2 bevel-in bg-paper px-3 py-2">
             <SmileIcon size={16} className="shrink-0 text-ink/40" aria-hidden />
             <input
               type="text"
@@ -465,7 +462,7 @@ export function About() {
               tabIndex={-1}
               placeholder={`Message ${activeRoom.label}...`}
               aria-label="This conversation is read-only"
-              className="min-w-0 flex-1 cursor-not-allowed bg-transparent text-[14px] text-ink placeholder:text-ink/40 focus:outline-none disabled:opacity-100"
+              className="min-w-0 flex-1 cursor-not-allowed bg-transparent font-mono text-base max-md:text-[18px] text-ink placeholder:text-ink/40 focus:outline-none disabled:opacity-100"
             />
             <ImageIcon size={16} className="shrink-0 text-ink/40" aria-hidden />
             <button
@@ -473,7 +470,7 @@ export function About() {
               disabled
               tabIndex={-1}
               aria-label="This conversation is read-only"
-              className="grid h-8 w-8 shrink-0 cursor-not-allowed place-items-center rounded-full bg-accent text-on-accent disabled:opacity-100"
+              className="grid h-8 w-8 shrink-0 cursor-not-allowed place-items-center bevel bg-accent text-paper disabled:opacity-100"
             >
               <SendIcon size={14} />
             </button>

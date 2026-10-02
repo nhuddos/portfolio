@@ -1,5 +1,6 @@
 import React, { lazy } from "react";
-import { FileTextIcon, HouseIcon, LayersIcon, UserRoundIcon, DiscIcon } from "lucide-react";
+import { FileTextIcon } from "lucide-react";
+import { PixelHomeIcon, PixelWorksIcon, PixelAboutIcon, PixelMusicIcon } from "../components/PixelIcons";
 import { Home } from "../pages/Home";
 const Works = lazy(() => import("../pages/Works").then((m) => ({ default: m.Works })));
 const About = lazy(() => import("../pages/About").then((m) => ({ default: m.About })));
@@ -10,7 +11,7 @@ export const appRegistry = {
     home: {
         id: 'home',
         label: 'Home',
-        icon: HouseIcon,
+        icon: PixelHomeIcon,
         color: 'bg-sky',
         tint: 'var(--accent)',
         route: '/',
@@ -20,9 +21,9 @@ export const appRegistry = {
     works: {
         id: 'works',
         label: 'Works',
-        icon: LayersIcon,
+        icon: PixelWorksIcon,
         color: 'bg-accent-2',
-        tint: 'var(--lilac)',
+        tint: 'var(--accent-2)',
         route: '/works',
         onDesktop: true,
         render: () => <Works />
@@ -30,9 +31,9 @@ export const appRegistry = {
     about: {
         id: 'about',
         label: 'About',
-        icon: UserRoundIcon,
+        icon: PixelAboutIcon,
         color: 'bg-mint',
-        tint: 'var(--mint)',
+        tint: 'var(--accent)',
         route: '/about',
         onDesktop: true,
         render: () => <About />
@@ -40,7 +41,7 @@ export const appRegistry = {
     music: {
         id: 'music',
         label: 'Music',
-        icon: DiscIcon,
+        icon: PixelMusicIcon,
         color: 'bg-accent',
         tint: 'var(--accent-2)',
         route: '/music',
