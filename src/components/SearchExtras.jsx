@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ChevronDownIcon } from 'lucide-react';
 import { reducedMotion, wiggle } from '../motion';
@@ -91,7 +90,8 @@ export function Pagination() {
   const onPage = (e, page) => {
     if (page === 1) return;
     wiggle(e.currentTarget);
-    setNote(page === 5 ? 'page 5 is just more of page 1' : `page ${page} is still loading (forever)`);
+    if (page === 'next') setNote('there is no next page. this is it. this is all of me');
+    else setNote(page === 5 ? 'page 5 is just more of page 1' : `page ${page} is still loading (forever)`);
   };
 
   return (
@@ -115,7 +115,7 @@ export function Pagination() {
             </span>
           );
         })}
-        <Link to="/about" className="mb-[1px] ml-4 font-mono text-xl leading-none text-lilac hover:underline">Next ›</Link>
+        <button type="button" onClick={(e) => onPage(e, 'next')} className="mb-[1px] ml-4 font-mono text-xl leading-none text-lilac hover:underline">Next ›</button>
       </div>
       <p role="status" className="mt-3 h-5 font-mono text-lg leading-none text-ink/50">{note}</p>
     </nav>

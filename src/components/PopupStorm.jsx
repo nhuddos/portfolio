@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { AlertTriangleIcon, HelpCircleIcon, InfoIcon, XIcon } from 'lucide-react';
-import { projects } from '../data/projects';
 import { asset } from '../assetUrl.js';
 
 /* ------------------------------------------------------------------ */
 /* Content                                                            */
 /* ------------------------------------------------------------------ */
 
-// Image popups: project covers plus a couple of portraits.
+// Image popups: memes, in public/images/popups/.
 const IMAGES = [
-  { src: asset('/images/khanhdo.webp'), name: 'khanh.webp', alt: 'Khanh Do' },
-  ...projects.map((p) => ({ src: p.cover, name: `${p.slug}.webp`, alt: p.title })),
-  { src: asset('/images/khanhdo2.webp'), name: 'also_khanh.webp', alt: 'Khanh Do' }
+  { src: asset('/images/popups/horse.webp'), name: 'horse.webp', alt: 'A pixelated horse with weirdly long legs' },
+  { src: asset('/images/popups/cat.webp'), name: 'cat.webp', alt: 'A pixel drawing of a grumpy cream cat' },
+  { src: asset('/images/popups/sneeze.webp'), name: 'achoo.webp', alt: 'A doodle of one cat sneezing on another' },
+  { src: asset('/images/popups/wikihow.webp'), name: 'wikihow.webp', alt: 'WikiHow illustration titled How to Have Fun When You\u2019re Poor' },
+  { src: asset('/images/popups/camel.webp'), name: 'camel.webp', alt: 'A camel wearing black high heel boots' }
 ];
 
 const ASK = { title: 'portfolio.exe', kind: 'question', text: 'are you sure you want to see my portfolio?', buttons: ['Yes', 'No'] };
@@ -28,38 +29,32 @@ const say = (title, kind, text, buttons = ['OK']) => ({ title, kind, text, butto
 const SCRIPT = [
   ASK, { image: 0 }, WORTH,
   say('Message', 'info', 'im actually a catch'),
-  { image: 1 }, STAY,
+  STAY,
   say('Message', 'info', 'im a really nice guy'),
-  { image: 2 },
+  { image: 1 },
   say('Security', 'question', 'trust me', ['OK', 'Sure']),
-  SCARED, { image: 3 }, BUT,
+  SCARED, BUT,
+  { image: 2 },
   say('hire_me.exe', 'warn', 'hire me', ['Hire', 'Hire']),
-  { image: 4 },
   say('Message', 'question', 'pick me', ['OK']),
   say('Message', 'warn', 'PICK ME', ['OK']),
-  { image: 5 },
+  { image: 3 },
   say('Message', 'info', 'im running out of things i want to say'),
   say('Request', 'question', 'email me ur fav anime if ur not gonna hire me', ['OK', 'Later']),
-  { image: 6 },
   say('recruiter.exe', 'info', 'lowkirkenuinely hit my line if ur a recruiter', ['OK']),
-  { image: 7 },
+  { image: 4 },
+  say('joke.exe', 'question', 'will u hire me if im sorta kinda funny', ['Yes', 'Yes']),
   say('Warning', 'warn', 'please please please', ['OK', 'OK', 'OK'])
 ].filter((entry) => entry.image == null || entry.image < IMAGES.length);
 
-// The professor's fault. Slotted in at a random point in each storm (never
-// first, since the "are you sure" popup opens the show).
+// The professor's fault. Not part of the storm: <ConfessionPopup> shows it
+// once per visit while someone is browsing Works or About.
 const CONFESSION = {
   title: 'README.txt',
   kind: 'info',
   text: "if you cringe at this portfolio then i have succeeded because this used to be a normal portfolio but my professor told me it said nothing about me so now you're bombarded with this bullcrap. ur welcome dawg o(\u2267\u2207\u2266o) if you were put off by anything, it was him and if you want to hire me then it was my idea all along.",
   buttons: ['OK', 'Hire']
 };
-
-function buildScript() {
-  const script = [...SCRIPT];
-  script.splice(1 + Math.floor(Math.random() * script.length), 0, CONFESSION);
-  return script;
-}
 
 // Held back until every other popup has been closed.
 const FINALE = { title: 'Hello?', kind: 'question', text: 'you still here?', buttons: ['Yes', 'Yes'] };
@@ -153,7 +148,7 @@ function makePopup(entry, area, { center = false } = {}) {
   const isImage = entry.image != null;
   const isLong = !isImage && (entry.text?.length ?? 0) > 120;
   const width = Math.min(isImage ? Math.round(rand(280, 380)) : isLong ? Math.round(rand(420, 460)) : Math.round(rand(300, 360)), W - 16);
-  const estHeight = isImage ? width * 0.625 + 110 : isLong ? 300 : 180;
+  const estHeight = isImage ? 360 : isLong ? 380 : 180;
   let x;
   let y;
   if (center) {
@@ -233,8 +228,8 @@ function Popup({ popup, onClose }) {
 
       {popup.image ?
         <div id={bodyId} className="p-2">
-          <div className="bevel-in aspect-[16/10] overflow-hidden bg-paper">
-            <img src={popup.image.src} alt={popup.image.alt} className="pixelated h-full w-full object-cover" />
+          <div className="bevel-in overflow-hidden bg-white">
+            <img src={popup.image.src} alt={popup.image.alt} className="pixelated mx-auto max-h-[240px] w-full object-contain" />
           </div>
         </div> :
         <div className="flex items-start gap-3 px-4 pb-3 pt-4">
@@ -270,7 +265,7 @@ export function PopupStorm({ onDone }) {
 
   // Spawn the storm: starts at a steady pace and speeds up.
   useEffect(() => {
-    const script = buildScript();
+    const script = SCRIPT;
     let i = 0;
     let delay = 300;
     let timer;
@@ -343,6 +338,41 @@ export function PopupStorm({ onDone }) {
       aria-live="assertive"
     >
       {popups.map((p) => <Popup key={p.id} popup={p} onClose={closePopup} />)}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* The README confession                                              */
+/* ------------------------------------------------------------------ */
+
+const CONFESSION_SEEN = 'nhuddos-confession-shown';
+
+/*
+  One popup, once per visit, at a random moment (6 to 18 seconds in) while
+  the visitor is looking at Works, a project or About. Leaving those windows
+  pauses the countdown; coming back starts a fresh one. Unlike the storm it
+  doesn't block the desktop.
+*/
+export function ConfessionPopup({ active }) {
+  const [popup, setPopup] = useState(null);
+
+  useEffect(() => {
+    if (!active || popup || sessionStorage.getItem(CONFESSION_SEEN) === '1') return undefined;
+    const timer = setTimeout(() => {
+      sessionStorage.setItem(CONFESSION_SEEN, '1');
+      setPopup(makePopup(CONFESSION, null));
+      playPing();
+    }, rand(6000, 18000));
+    return () => clearTimeout(timer);
+  }, [active, popup]);
+
+  if (!popup || popup.closed) return null;
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[85]" aria-live="assertive">
+      <div className="pointer-events-auto">
+        <Popup popup={popup} onClose={() => setPopup({ ...popup, closed: true })} />
+      </div>
     </div>
   );
 }

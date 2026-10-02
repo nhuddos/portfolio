@@ -8,7 +8,7 @@ import { useDesktop } from '../contexts/DesktopContext';
 import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
-import { PopupStorm } from './PopupStorm';
+import { ConfessionPopup, PopupStorm } from './PopupStorm';
 import { SecretFile } from './SecretFile';
 import { AppErrorBoundary } from './AppErrorBoundary';
 import { pixelBurst, wiggle } from '../motion';
@@ -280,6 +280,8 @@ export function Desktop() {
     <Taskbar onRestart={restart} />
 
     {booted && popupsActive && <PopupStorm onDone={endPopups} />}
+
+    <ConfessionPopup active={booted && !popupsActive && windows.some((w) => ['works', 'project', 'about'].includes(w.appId) && w.status !== 'minimized')} />
 
   </div>);
 }
