@@ -8,7 +8,6 @@ import { useDesktop } from '../contexts/DesktopContext';
 import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
-import { Field } from './Field';
 import { PopupStorm } from './PopupStorm';
 import { pixelBurst, wiggle } from '../motion';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
@@ -209,8 +208,7 @@ export function Desktop() {
     pixelBurst(e.clientX, e.clientY);
   };
 
-  return (<div className="relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period} data-desktop-surface onPointerDown={onDesktopPointerDown}>
-    <Field />
+  return (<div className="bg-grid relative flex h-screen w-full flex-col overflow-hidden" data-time-of-day={period} data-desktop-surface onPointerDown={onDesktopPointerDown}>
     {!booted && <BootScreen onReveal={revealDesktop} onComplete={completeBoot} />}
 
     {isNarrow ? (

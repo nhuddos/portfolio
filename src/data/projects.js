@@ -318,3 +318,13 @@ export const projects = withBase([
 export function getProject(slug) {
     return projects.find((p) => p.slug === slug);
 }
+
+/* Every distinct image (cover first) of the given projects, tagged with its project. */
+export function imagesFor(list) {
+  return list.flatMap((p) => {
+    const urls = new Set();
+    return [{ url: p.cover, caption: p.title }, ...(p.images || [])]
+      .filter((img) => img.url && !urls.has(img.url) && urls.add(img.url))
+      .map((img) => ({ ...img, project: p }));
+  });
+}

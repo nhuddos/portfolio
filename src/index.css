@@ -210,6 +210,19 @@ body {
   }
 }
 
+/* Desktop wallpaper: pixel graph paper. Fine lines every 24px, a stronger
+   line every 5 squares, tinted by the time-of-day palette. */
+.bg-grid {
+  background-color: var(--checker-a);
+  background-image:
+    linear-gradient(rgb(var(--ink-rgb) / 0.12) 2px, transparent 2px),
+    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.12) 2px, transparent 2px),
+    linear-gradient(rgb(var(--ink-rgb) / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.06) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
+}
+
 /* Flat pixel scrollbar: square thumb, no arrow buttons. */
 .window-scroll {
   scrollbar-width: thin;
