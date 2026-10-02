@@ -23,7 +23,7 @@ export function BootScreen({ onReveal, onComplete }) {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ onComplete });
       timeline.current = tl;
-      tl.fromTo('[data-boot-logo]', { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2.5)' }).
+      tl.fromTo('[data-boot-logo]', { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: 'steps(4)' }).
         fromTo('[data-boot-line]', { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.1, stagger: 0.09, ease: 'none' }, '-=0.1').
         fromTo('[data-boot-bar]', { scaleX: 0 }, {
           scaleX: 1,

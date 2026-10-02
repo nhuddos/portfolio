@@ -4,7 +4,7 @@ import { PowerIcon, MailIcon, XIcon } from 'lucide-react';
 import { CONTACT_LINKS, resolveLogoSrc } from '../data/contactLinks.js';
 import { useDesktop } from '../contexts/DesktopContext';
 import { desktopApps, titleFor } from './appRegistry';
-import { hop, reducedMotion } from '../motion';
+import { hop, reducedMotion, setZoomOrigin } from '../motion';
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -36,8 +36,8 @@ export function Taskbar({ onRestart }) {
     knownTabs.current = new Set(ids);
     if (!fresh.length || reducedMotion()) return;
     const els = fresh.map((id) => document.getElementById(`taskbar-tab-${id}`)).filter(Boolean);
-    gsap.fromTo(els, { scale: 0.4, y: 12, opacity: 0 }, {
-      scale: 1, y: 0, opacity: 1, duration: 0.5, ease: 'back.out(2.5)', stagger: 0.05, clearProps: 'transform,opacity'
+    gsap.fromTo(els, { clipPath: 'inset(0% 100% 0% 0%)' }, {
+      clipPath: 'inset(0% 0% 0% 0%)', duration: 0.24, ease: 'steps(4)', stagger: 0.05, delay: 0.25, clearProps: 'clipPath'
     });
   }, [windows]);
 
@@ -45,15 +45,9 @@ export function Taskbar({ onRestart }) {
     const el = menuRef.current;
     if (!startOpen || !el) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(el, { opacity: 0, y: 12, scaleY: 0.9 }, {
-        opacity: 1,
-        y: 0,
-        scaleY: 1,
-        duration: 0.18,
-        ease: 'power3.out',
-        transformOrigin: 'bottom center'
-      });
-      gsap.fromTo(el.querySelectorAll('[data-menu-item]'), { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.35, ease: 'back.out(2)', stagger: 0.04, delay: 0.06 });
+      // The menu unrolls upward from the Start button in hard steps.
+      gsap.fromTo(el, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.2, ease: 'steps(5)', clearProps: 'clipPath' });
+      gsap.fromTo(el.querySelectorAll('[data-menu-item]'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.05, ease: 'steps(1)', stagger: 0.04, delay: 0.15 });
     }, el);
     return () => ctx.revert();
   }, [startOpen]);
@@ -77,29 +71,30 @@ export function Taskbar({ onRestart }) {
   }, [startOpen]);
 
   return (<div data-taskbar className="relative z-[60] shrink-0 px-2.5 pb-3 pt-1 sm:px-4 sm:pb-4">
-    <div className="flex items-center gap-2 bevel bg-paper px-2 py-2 shadow-pixel sm:gap-3">
+    <div className="flex items-center gap-2 bevel bg-paper px-2 py-2 shadow-pixel [--bevel-radius:12px] sm:gap-3">
     <div className="relative" data-start-region>
-      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 px-3 py-2.5 text-lg uppercase text-ink max-md:text-[22px] sm:py-2 sm:text-xl ${startOpen ? 'bg-ink text-paper' : 'bg-accent hover:bg-accent-2'}`}>
-        <span className="grid h-5 w-5 shrink-0 grid-cols-2 gap-px" aria-hidden>
-          <i className="bg-ink" />
-          <i className="bg-paper" />
-          <i className="bg-paper" />
+      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 rounded-md border-2 border-ink px-3 py-2 text-lg uppercase max-md:text-[22px] sm:py-1.5 sm:text-xl ${startOpen ? 'bg-ink text-paper' : 'bg-accent-2 text-ink hover:bg-accent'}`}>
+        <span className="grid h-5 w-5 shrink-0 grid-cols-2 gap-[2px]" aria-hidden>
+          <i className="bg-accent" />
+          <i className="bg-mint" />
+          <i className="bg-lilac" />
           <i className="bg-ink" />
         </span>
         Start
       </button>
 
       {startOpen &&
-        <div ref={menuRef} className="absolute bottom-full left-0 mb-4 w-[min(20rem,calc(100vw-1.5rem))] bevel bg-paper p-2 shadow-pixel-lg">
+        <div ref={menuRef} className="absolute bottom-full left-0 mb-4 w-[min(20rem,calc(100vw-1.5rem))] bevel bg-paper p-2 shadow-pixel-lg [--bevel-radius:12px]">
 
-          <div className="mb-2 bg-ink px-3 py-3 font-handjet text-3xl uppercase leading-none tracking-wide text-paper">
+          <div className="mb-2 rounded-md bg-ink px-3 py-3 font-handjet text-3xl uppercase leading-none tracking-wide text-paper">
             Khanh Do
           </div>
           <nav className="flex flex-col">
-            {desktopApps.map((app) => <button key={app.id} data-menu-item onClick={() => {
+            {desktopApps.map((app) => <button key={app.id} data-menu-item onClick={(e) => {
+              if (!windows.some((w) => w.id === app.id)) setZoomOrigin(e.currentTarget);
               open(app.id, { title: titleFor(app.id), size: app.size, anchor: app.anchor });
               setStartOpen(false);
-            }} className="group flex items-center gap-3 px-3 py-2 text-left font-mono text-xl text-ink hover:bg-accent-2 max-md:text-[28px]">
+            }} className="group flex items-center gap-3 rounded-md px-3 py-2 text-left font-mono text-xl text-ink hover:bg-accent-2 max-md:text-[28px]">
 
               {app.label}
             </button>)}
@@ -124,7 +119,7 @@ export function Taskbar({ onRestart }) {
           <button data-menu-item onClick={() => {
             setStartOpen(false);
             onRestart();
-          }} className="mt-3 flex w-full items-center gap-3 border-t-2 border-dashed border-ink/20 px-3 py-2.5 font-mono text-xl text-ink/70 hover:bg-ink hover:text-paper max-md:text-[28px]">
+          }} className="mt-3 flex w-full items-center gap-3 rounded-md px-3 py-2.5 font-mono text-xl text-ink/70 hover:bg-ink hover:text-paper max-md:text-[28px]">
 
             <PowerIcon size={20} strokeWidth={2.5} />
             Restart
@@ -136,13 +131,13 @@ export function Taskbar({ onRestart }) {
 
       {windows.map((win) => {
         const isActive = focusedId === win.id && win.status !== 'minimized';
-        return (<span key={win.id} id={`taskbar-tab-${win.id}`} className={`flex min-w-0 shrink-0 items-center ${isActive ? 'bg-ink text-paper' : 'dither text-ink hover:bg-accent-2'}`}>
+        return (<span key={win.id} id={`taskbar-tab-${win.id}`} className={`flex min-w-0 shrink-0 items-center rounded-md border-2 border-ink ${isActive ? 'bg-ink text-paper' : 'bg-paper text-ink hover:bg-accent-2'}`}>
 
-          <button onClick={() => toggleFromTaskbar(win.id)} aria-label={`${isActive ? 'Minimize' : 'Open'} ${win.title}`} className="flex min-w-0 items-center gap-1.5 px-3 py-2.5 font-mono text-lg uppercase max-md:text-[22px] sm:gap-2.5 sm:py-2 sm:text-xl">
+          <button onClick={() => toggleFromTaskbar(win.id)} aria-label={`${isActive ? 'Minimize' : 'Open'} ${win.title}`} className="flex min-w-0 items-center gap-1.5 px-3 py-2 font-mono text-lg uppercase max-md:text-[22px] sm:gap-2.5 sm:py-1.5 sm:text-xl">
 
             <span className="max-w-[90px] truncate sm:max-w-[190px]">{win.title}</span>
           </button>
-          <button onClick={() => close(win.id)} aria-label={`Close ${win.title}`} className="mr-1 grid h-10 w-10 shrink-0 place-items-center opacity-60 hover:bg-accent hover:text-ink hover:opacity-100 sm:h-6 sm:w-6">
+          <button onClick={() => close(win.id)} aria-label={`Close ${win.title}`} className="mr-1 grid h-9 w-9 shrink-0 place-items-center rounded opacity-60 hover:bg-accent hover:text-ink hover:opacity-100 sm:h-6 sm:w-6">
 
             <XIcon size={16} strokeWidth={3} />
           </button>

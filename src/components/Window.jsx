@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { MinusIcon, SquareIcon, XIcon, CopyIcon } from "lucide-react";
 import { useDesktop } from "../contexts/DesktopContext";
 import { MenuBar } from "./MenuBar";
+import { reducedMotion, shrinkRect, takeZoomOrigin, zoomRects } from "../motion";
 
 export function Window({ win, children, isNarrow, hold = false }) {
     const { focus, close, minimize, toggleMaximize, move, focusedId, open } = useDesktop();
@@ -14,26 +15,26 @@ export function Window({ win, children, isNarrow, hold = false }) {
     const isFocused = focusedId === win.id;
     const isMax = win.status === 'maximized' || isNarrow;
 
+    /* Opening: zoom rectangles step out from whatever launched the window
+       (an icon, a menu item) or from the window's own centre. */
     useLayoutEffect(() => {
         const el = ref.current;
-        if (!el || hold) return;
-        // Windows land like a dropped card: a little tilt that settles.
-        gsap.fromTo(el, {
-            opacity: 0,
-            scale: 0.86,
-            y: 28,
-            rotate: gsap.utils.random([-2, -1.5, 1.5, 2])
-        }, {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            rotate: 0,
-            duration: 0.55,
-            ease: 'back.out(1.7)',
-            clearProps: 'rotate'
+        if (!el || hold || reducedMotion()) return undefined;
+        const to = el.getBoundingClientRect();
+        const from = takeZoomOrigin() ?? shrinkRect(to);
+        let cancelled = false;
+        gsap.set(el, { opacity: 0 });
+        zoomRects(from, to).then(() => {
+            if (cancelled || !ref.current) return;
+            gsap.set(el, { opacity: 1 });
         });
+        return () => {
+            cancelled = true;
+            gsap.set(el, { clearProps: 'opacity' });
+        };
     }, [hold]);
 
+    /* Maximise / restore: the window snaps between sizes in a few frames. */
     useLayoutEffect(() => {
         const el = ref.current;
         const from = flipFrom.current;
@@ -51,32 +52,24 @@ export function Window({ win, children, isNarrow, hold = false }) {
             y: 0,
             scaleX: 1,
             scaleY: 1,
-            duration: 0.42,
-            ease: 'expo.inOut',
-            transformOrigin: 'top left'
+            duration: 0.28,
+            ease: 'steps(5)',
+            transformOrigin: 'top left',
+            clearProps: 'transform'
         });
     }, [win.status]);
 
+    /* Restoring from the dock: rectangles step from the taskbar tab back up. */
     useEffect(() => {
         const el = ref.current;
         const was = prevStatus.current;
         prevStatus.current = win.status;
-        if (!el || was !== 'minimized' || win.status === 'minimized') return;
+        if (!el || was !== 'minimized' || win.status === 'minimized' || reducedMotion()) return;
         const tab = document.getElementById(`taskbar-tab-${win.id}`);
-        const r = el.getBoundingClientRect();
-        const t = tab?.getBoundingClientRect();
-        gsap.fromTo(el, {
-            x: t ? t.left + t.width / 2 - (r.left + r.width / 2) : 0,
-            y: t ? t.top + t.height / 2 - (r.top + r.height / 2) : 220,
-            scale: 0.15,
-            opacity: 0
-        }, {
-            x: 0,
-            y: 0,
-            scale: 1,
-            opacity: 1,
-            duration: 0.34,
-            ease: 'power3.out'
+        const to = el.getBoundingClientRect();
+        gsap.set(el, { opacity: 0 });
+        zoomRects(tab?.getBoundingClientRect() ?? shrinkRect(to), to).then(() => {
+            if (ref.current) gsap.set(el, { clearProps: 'opacity' });
         });
     }, [win.status, win.id]);
 
@@ -84,36 +77,20 @@ export function Window({ win, children, isNarrow, hold = false }) {
         const el = ref.current;
         if (!el) return minimize(win.id);
         const tab = document.getElementById(`taskbar-tab-${win.id}`);
-        const r = el.getBoundingClientRect();
-        const t = tab?.getBoundingClientRect();
-        gsap.to(el, {
-            x: t ? t.left + t.width / 2 - (r.left + r.width / 2) : 0,
-            y: t ? t.top + t.height / 2 - (r.top + r.height / 2) : 220,
-            scale: 0.15,
-            opacity: 0,
-            duration: 0.26,
-            ease: 'power2.in',
-            onComplete: () => {
-                gsap.set(el, {
-                    clearProps: 'transform,opacity'
-                });
-                minimize(win.id);
-            }
+        const from = el.getBoundingClientRect();
+        gsap.set(el, { opacity: 0 });
+        zoomRects(from, tab?.getBoundingClientRect() ?? shrinkRect(from)).then(() => {
+            gsap.set(el, { clearProps: 'opacity' });
+            minimize(win.id);
         });
     }, [minimize, win.id]);
 
     const handleClose = useCallback(() => {
         const el = ref.current;
         if (!el) return close(win.id);
-        gsap.to(el, {
-            scale: 0.88,
-            opacity: 0,
-            y: 24,
-            rotate: 2,
-            duration: 0.22,
-            ease: 'back.in(1.6)',
-            onComplete: () => close(win.id)
-        });
+        const from = el.getBoundingClientRect();
+        gsap.set(el, { opacity: 0 });
+        zoomRects(from, shrinkRect(from)).then(() => close(win.id));
     }, [close, win.id]);
 
     const handleMaximize = useCallback(() => {
@@ -211,41 +188,44 @@ export function Window({ win, children, isNarrow, hold = false }) {
                 visibility: hold ? 'hidden' : undefined,
                 display: win.status === 'minimized' ? 'none' : 'flex'
             }}
-            className={`absolute flex-col bevel bg-paper ${isFocused ? 'shadow-pixel-lg' : 'shadow-pixel-sm'}`}
+            className={`absolute flex-col overflow-hidden bevel bg-paper [--bevel-radius:12px] ${isFocused ? 'shadow-pixel-lg' : 'shadow-pixel'}`}
         >
-            {/* Title bar */}
+            {/* Title bar: close box left, pinstripes either side of the title
+                (only on the focused window, like classic Mac OS), size boxes right. */}
             <div
                 onPointerDown={onPointerDown}
                 onDoubleClick={handleMaximize}
-                className={`flex shrink-0 items-center justify-between gap-2 px-2.5 py-2.5 sm:py-2 ${isMax ? '' : 'titlebar-grab'} ${isFocused ? 'bg-ink text-paper' : 'dither bg-paper text-ink/60'}`}
+                className={`flex shrink-0 items-center gap-2 border-b-2 border-ink bg-paper px-2.5 ${isNarrow ? 'py-1.5' : 'py-2'} ${isMax ? '' : 'titlebar-grab'}`}
             >
-                <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="truncate font-mono text-lg uppercase leading-none max-md:text-[24px]">
-                        {win.appId === 'project' && win.title.includes('\u203A') ?
-                            <>
-                                <Link
-                                    to="/works"
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    className="hover:text-accent focus-visible:text-accent focus-visible:outline-none"
-                                >
-                                    Works
-                                </Link>
-                                {' \u203A ' + win.title.split('\u203A').slice(1).join('\u203A').trim()}
-                            </> :
-                            win.title}
-                    </span>
-                </div>
+                <button onClick={handleClose} onPointerDown={(e) => e.stopPropagation()} aria-label={`Close ${win.title}`} className={`grid shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink transition-colors active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-6 w-6'} hover:bg-accent ${isFocused ? '' : 'opacity-40'}`}>
+                    <XIcon size={isNarrow ? 18 : 13} strokeWidth={3} />
+                </button>
 
-                <div className="flex shrink-0 items-center gap-2 sm:gap-1.5">
-                    <button onClick={handleMinimize} aria-label={`Minimize ${win.title}`} className={`grid place-items-center bg-accent-2 text-ink hover:bg-paper active:translate-y-0.5 ${isNarrow ? 'h-11 w-11 min-h-[44px] min-w-[44px]' : 'h-6 w-6 min-h-[24px] min-w-[24px]'}`}>
-                        <MinusIcon size={isNarrow ? 18 : 14} strokeWidth={3} />
+                <span className={`pinstripe h-[12px] min-w-[12px] flex-1 ${isFocused ? '' : 'invisible'}`} aria-hidden="true" />
+                <span className={`min-w-0 truncate px-1 font-mono text-xl uppercase leading-none max-md:text-[22px] ${isFocused ? 'text-ink' : 'text-ink/45'}`}>
+                    {win.appId === 'project' && win.title.includes('\u203A') ?
+                        <>
+                            <Link
+                                to="/works"
+                                onPointerDown={(e) => e.stopPropagation()}
+                                className="underline-offset-4 hover:text-lilac hover:underline focus-visible:text-lilac focus-visible:outline-none"
+                            >
+                                Works
+                            </Link>
+                            {' \u203A ' + win.title.split('\u203A').slice(1).join('\u203A').trim()}
+                        </> :
+                        win.title}
+                </span>
+                <span className={`pinstripe h-[12px] min-w-[12px] flex-1 ${isFocused ? '' : 'invisible'}`} aria-hidden="true" />
+
+                <div className={`flex shrink-0 items-center gap-1.5 ${isFocused ? '' : 'opacity-40'}`}>
+                    <button onClick={handleMinimize} onPointerDown={(e) => e.stopPropagation()} aria-label={`Minimize ${win.title}`} className={`grid shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink transition-colors active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-6 w-6'} hover:bg-accent-2`}>
+                        <MinusIcon size={isNarrow ? 18 : 13} strokeWidth={3} />
                     </button>
-                    <button onClick={handleMaximize} aria-label={win.status === 'maximized' ? `Restore ${win.title}` : `Maximize ${win.title}`} className={`grid place-items-center bg-mint text-ink hover:bg-paper active:translate-y-0.5 ${isNarrow ? 'h-11 w-11 min-h-[44px] min-w-[44px]' : 'h-6 w-6 min-h-[24px] min-w-[24px]'}`}>
-                        {win.status === 'maximized' ? <CopyIcon size={isNarrow ? 16 : 12} strokeWidth={3} /> : <SquareIcon size={isNarrow ? 16 : 12} strokeWidth={3} />}
-                    </button>
-                    <button onClick={handleClose} aria-label={`Close ${win.title}`} className={`grid place-items-center bg-accent text-ink hover:bg-paper active:translate-y-0.5 ${isNarrow ? 'h-11 w-11 min-h-[44px] min-w-[44px]' : 'h-6 w-6 min-h-[24px] min-w-[24px]'}`}>
-                        <XIcon size={isNarrow ? 18 : 14} strokeWidth={3} />
-                    </button>
+                    {!isNarrow &&
+                        <button onClick={handleMaximize} onPointerDown={(e) => e.stopPropagation()} aria-label={win.status === 'maximized' ? `Restore ${win.title}` : `Maximize ${win.title}`} className={`grid shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink transition-colors active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-6 w-6'} hover:bg-mint`}>
+                            {win.status === 'maximized' ? <CopyIcon size={12} strokeWidth={3} /> : <SquareIcon size={12} strokeWidth={3} />}
+                        </button>}
                 </div>
             </div>
 

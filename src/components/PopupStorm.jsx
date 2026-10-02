@@ -210,20 +210,22 @@ function Popup({ popup, onClose }) {
       aria-labelledby={titleId}
       aria-describedby={bodyId}
       style={{ left: popup.x, top: popup.y, width: popup.width }}
-      className="absolute flex flex-col bevel bg-paper shadow-pixel-lg"
+      className="absolute flex flex-col overflow-hidden bevel bg-paper shadow-pixel-lg [--bevel-radius:10px]"
     >
-      <div className="flex items-center justify-between gap-2 bg-ink px-2 py-1.5">
-        <span id={titleId} className="truncate font-mono text-lg leading-none text-paper">
-          {popup.title}
-        </span>
+      <div className="flex items-center gap-2 border-b-2 border-ink px-2 py-1.5">
         <button
           type="button"
           onClick={close}
           aria-label={`Close ${popup.title}`}
-          className="grid h-7 w-7 shrink-0 place-items-center bevel bg-accent text-ink hover:bg-paper active:translate-y-0.5"
+          className="grid h-6 w-6 shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink hover:bg-accent active:translate-y-px"
         >
-          <XIcon size={14} strokeWidth={3} />
+          <XIcon size={13} strokeWidth={3} />
         </button>
+        <span className="pinstripe h-[10px] min-w-[10px] flex-1" aria-hidden="true" />
+        <span id={titleId} className="min-w-0 truncate px-1 font-mono text-lg leading-none text-ink">
+          {popup.title}
+        </span>
+        <span className="pinstripe h-[10px] min-w-[10px] flex-1" aria-hidden="true" />
       </div>
 
       {popup.image ?
@@ -233,7 +235,7 @@ function Popup({ popup, onClose }) {
           </div>
         </div> :
         <div className="flex items-start gap-3 px-4 pb-3 pt-4">
-          <span className={`grid h-10 w-10 shrink-0 place-items-center border-2 border-ink text-ink ${kind.bg}`}>
+          <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-md border-2 border-ink text-ink ${kind.bg}`}>
             <kind.Icon size={22} strokeWidth={2.5} />
           </span>
           <p id={bodyId} className="pt-1 font-mono text-xl leading-tight text-ink">
@@ -248,7 +250,7 @@ function Popup({ popup, onClose }) {
             ref={i === 0 ? firstButton : undefined}
             type="button"
             onClick={close}
-            className="min-w-[5.5rem] bevel bg-paper px-4 py-1.5 font-mono text-lg leading-none text-ink hover:bg-accent-2 focus:outline-none focus-visible:outline-dashed focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-ink active:translate-y-0.5"
+            className="min-w-[5.5rem] bevel bg-paper px-4 py-1.5 shadow-pixel-sm active:shadow-pixel-none font-mono text-lg leading-none text-ink hover:bg-accent-2 focus:outline-none focus-visible:outline-dashed focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-ink active:translate-y-0.5"
           >
             {label}
           </button>

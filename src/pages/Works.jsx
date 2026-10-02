@@ -51,11 +51,11 @@ export function Works() {
     if (!state || !rootRef.current) return;
     Flip.from(state, {
       targets: rootRef.current.querySelectorAll('[data-flip-id]'),
-      duration: 0.55,
-      ease: 'power3.inOut',
+      duration: 0.36,
+      ease: 'steps(6)',
       stagger: 0.03,
-      onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.85, rotate: () => gsap.utils.random(-4, 4) }, {
-        opacity: 1, scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2)', stagger: 0.03, clearProps: 'transform,opacity'
+      onEnter: (els) => gsap.fromTo(els, { opacity: 0, scale: 0.6, rotate: 0 }, {
+        opacity: 1, scale: 1, rotate: 0, duration: 0.24, ease: 'steps(4)', stagger: 0.03, clearProps: 'transform,opacity'
       })
     });
   }, [active, query]);

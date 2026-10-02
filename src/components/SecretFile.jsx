@@ -9,7 +9,7 @@ function PixelDoc({ size = 56 }) {
   const ink = 'var(--ink)';
   const px = (x, y, w = 1, h = 1, fill = ink) => <rect key={`${x}-${y}-${w}-${h}-${fill}`} x={x} y={y} width={w} height={h} fill={fill} />;
   return (
-    <svg viewBox="0 0 16 16" width={size} height={size} shapeRendering="crispEdges" aria-hidden="true" className="[filter:drop-shadow(3px_3px_0_var(--ink))]">
+    <svg viewBox="0 0 16 16" width={size} height={size} shapeRendering="crispEdges" aria-hidden="true" className="[filter:drop-shadow(3px_3px_0_var(--icon-shadow))]">
       {/* page */}
       {px(3, 1, 7, 14, 'var(--paper)')}
       {px(10, 4, 3, 11, 'var(--paper)')}
@@ -56,7 +56,7 @@ export function SecretFile() {
       <span className="transition-transform duration-150 group-hover:-translate-y-1 group-active:translate-y-0.5">
         <PixelDoc />
       </span>
-      <span className="bg-paper/70 px-1.5 py-0.5 font-mono text-lg uppercase leading-tight text-ink group-hover:bg-ink group-hover:text-paper group-focus-visible:bg-ink group-focus-visible:text-paper">
+      <span className="rounded-[4px] border-2 border-ink bg-paper px-1.5 py-0.5 font-mono text-lg uppercase leading-tight text-ink group-hover:bg-accent-2 group-focus-visible:bg-accent-2">
         Super secret do not open
       </span>
     </a>

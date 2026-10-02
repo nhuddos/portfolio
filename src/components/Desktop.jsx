@@ -11,7 +11,7 @@ import { BootScreen } from './BootScreen';
 import { ConfessionPopup, PopupStorm } from './PopupStorm';
 import { SecretFile } from './SecretFile';
 import { AppErrorBoundary } from './AppErrorBoundary';
-import { pixelBurst, wiggle } from '../motion';
+import { pixelBurst, setZoomOrigin, wiggle } from '../motion';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
 function getTimeOfDay(date = new Date()) {
   const hour = date.getHours();
@@ -68,13 +68,14 @@ export function Desktop() {
     if (!revealed || !dock)
       return;
     const ctx = gsap.context(() => {
-      gsap.fromTo('[data-icon]', { opacity: 0, x: -24, scale: 0.8 }, {
-        opacity: 1,
-        x: 0,
-        scale: 1,
-        duration: 0.4,
-        ease: 'back.out(2)',
-        stagger: 0.07
+      // Icons blink onto the desktop one by one, dropping in two frames.
+      gsap.fromTo('[data-icon]', { autoAlpha: 0, y: -8 }, {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.12,
+        ease: 'steps(2)',
+        stagger: 0.09,
+        clearProps: 'transform'
       });
     }, dock);
     return () => ctx.revert();
@@ -97,13 +98,13 @@ export function Desktop() {
     const grid = mobileMenuRef.current;
     if (!mobileMenuOpen || !grid) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo('[data-tile]', { opacity: 0, y: 16, scale: 0.85 }, {
-        opacity: 1,
+      gsap.fromTo('[data-tile]', { autoAlpha: 0, y: -8 }, {
+        autoAlpha: 1,
         y: 0,
-        scale: 1,
-        duration: 0.28,
-        ease: 'back.out(1.8)',
-        stagger: 0.035
+        duration: 0.12,
+        ease: 'steps(2)',
+        stagger: 0.05,
+        clearProps: 'transform'
       });
     }, grid);
     return () => ctx.revert();
@@ -139,13 +140,9 @@ export function Desktop() {
   }, [focusedId, windows, navigate, location.pathname]);
   const launch = (id, el) => {
     if (el) {
-      gsap.fromTo(el, { scale: 1 }, {
-        scale: 0.86,
-        duration: 0.09,
-        yoyo: true,
-        repeat: 1,
-        ease: 'power2.inOut'
-      });
+      // Two-frame "press", and the new window's zoom rects start from here.
+      gsap.fromTo(el, { y: 0 }, { y: 2, duration: 0.08, ease: 'steps(1)', yoyo: true, repeat: 1, clearProps: 'transform' });
+      if (!windows.some((w) => w.id === id)) setZoomOrigin(el.firstElementChild ?? el);
     }
     open(id, { title: titleFor(id), size: appRegistry[id]?.size, anchor: appRegistry[id]?.anchor });
   };
@@ -159,9 +156,9 @@ export function Desktop() {
       <app.icon
         size={64}
         style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
-        className="[filter:drop-shadow(3px_3px_0_var(--ink))] transition-transform group-active:scale-90"
+        className="[filter:drop-shadow(3px_3px_0_var(--icon-shadow))] transition-transform group-active:scale-90"
       />
-      <span className={`px-1 font-mono text-lg leading-none group-focus-visible:bg-ink group-focus-visible:text-paper ${isRunning ? 'bg-ink text-paper' : 'text-ink'}`}>
+      <span className={`rounded-[4px] border-2 border-ink px-1.5 py-0.5 font-mono text-lg leading-none group-focus-visible:bg-accent-2 ${isRunning ? 'bg-ink text-paper' : 'bg-paper text-ink'}`}>
 
         {app.label}
       </span>
@@ -174,9 +171,9 @@ export function Desktop() {
       <app.icon
         size={isNarrow ? 40 : 64}
         style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
-        className="transition-transform duration-150 [filter:drop-shadow(3px_3px_0_var(--ink))] group-hover:-translate-y-1 group-active:translate-y-0.5"
+        className="transition-transform duration-150 [transition-timing-function:steps(2)] [filter:drop-shadow(3px_3px_0_var(--icon-shadow))] group-hover:-translate-y-1 group-active:translate-y-0.5"
       />
-      <span className={`px-1.5 py-0.5 font-mono text-lg leading-none transition-colors group-hover:bg-ink group-hover:text-paper group-focus-visible:bg-ink group-focus-visible:text-paper ${isRunning ? 'bg-accent text-ink' : 'bg-paper/70 text-ink'}`}>
+      <span className={`rounded-[4px] border-2 border-ink px-1.5 py-0.5 font-mono text-lg leading-none group-hover:bg-accent-2 group-hover:text-ink group-focus-visible:bg-accent-2 ${isRunning ? 'bg-ink text-paper' : 'bg-paper text-ink'}`}>
 
         {app.label}
       </span>

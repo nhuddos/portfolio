@@ -4,104 +4,64 @@
 @import 'tailwindcss/utilities';
 
 
-:root {
-  --paper: #f2ecd6;
-  --ink: #1d3a3a;
-  --accent: #e2a542;
-  --accent-2: #f0d27a;
-  --mint: #7ec49f;
-  --lilac: #3f7a80;
-  --sky: #b7d9d6;
-  --muted: #86a39c;
-  --bevel-light: #f8f1da;
-  --bevel-dark: #2b5450;
-
-  --checker-a: #f4efd9;
-  --checker-b: #e6ede0;
-
-  --paper-rgb: 242 236 214;
-  --ink-rgb: 29 58 58;
-  --accent-rgb: 226 165 66;
-  --accent-2-rgb: 240 210 122;
-  --mint-rgb: 126 196 159;
-  --lilac-rgb: 63 122 128;
-  --sky-rgb: 183 217 214;
-  --muted-rgb: 134 163 156;
-}
-
-/* Morning — pastel teal-green field, soft gold light, pale sky */
+/*
+  Palette. Windows are always warm cream with near-black ink, for contrast;
+  what changes with the visitor's time of day is the bold desktop colour
+  and the accents:
+    morning   — fresh green desk, tangerine + sunshine accents
+    afternoon — cobalt-blue desk, tangerine + sunshine accents
+    night     — electric-violet desk, hot-pink + sunshine accents
+  --desk / --desk-line drive the wallpaper; everything else is a role
+  token (paper = surface, ink = text/lines, accent = action, lilac = links).
+*/
+:root,
 [data-time-of-day='morning'] {
-  --paper: #f2ecd6;
-  --ink: #1d3a3a;
-  --accent: #e2a542;
-  --accent-2: #f0d27a;
-  --mint: #7ec49f;
-  --lilac: #3f7a80;
-  --sky: #b7d9d6;
-  --muted: #86a39c;
-  --bevel-light: #f8f1da;
-  --bevel-dark: #2b5450;
-  --checker-a: #f4efd9;
-  --checker-b: #dae7cf;
+  --paper: #fff8ec;
+  --ink: #17141f;
+  --accent: #ff5c39;
+  --accent-2: #ffd447;
+  --mint: #2fcb8f;
+  --lilac: #3346e0;
+  --sky: #bfe6ff;
+  --muted: #8a8494;
+  --bevel-light: #ffffff;
+  --bevel-dark: #17141f;
+  --desk: #5ad25e;
+  --desk-line: rgb(0 0 0 / 0.09);
+  --icon-shadow: #17141f;
+  --checker-a: #fff8ec;
+  --checker-b: #ffe9b8;
 
-  --paper-rgb: 242 236 214;
-  --ink-rgb: 29 58 58;
-  --accent-rgb: 226 165 66;
-  --accent-2-rgb: 240 210 122;
-  --mint-rgb: 126 196 159;
-  --lilac-rgb: 63 122 128;
-  --sky-rgb: 183 217 214;
-  --muted-rgb: 134 163 156;
+  --paper-rgb: 255 248 236;
+  --ink-rgb: 23 20 31;
+  --accent-rgb: 255 92 57;
+  --accent-2-rgb: 255 212 71;
+  --mint-rgb: 47 203 143;
+  --lilac-rgb: 51 70 224;
+  --sky-rgb: 191 230 255;
+  --muted-rgb: 138 132 148;
 }
 
-/* Afternoon — golden-hour field, vivid sunset orange, bright teal accent */
 [data-time-of-day='afternoon'] {
-  --paper: #fbead2;
-  --ink: #2a1c10;
-  --accent: #ff7a30;
-  --accent-2: #ffc93c;
-  --mint: #c9d94f;
-  --lilac: #1f8a8a;
-  --sky: #ffdca6;
-  --muted: #c9a468;
-  --bevel-light: #fff1dc;
-  --bevel-dark: #4a2f14;
-  --checker-a: #fdf0da;
-  --checker-b: #ffd9a0;
-
-  --paper-rgb: 251 234 210;
-  --ink-rgb: 42 28 16;
-  --accent-rgb: 255 122 48;
-  --accent-2-rgb: 255 201 60;
-  --mint-rgb: 201 217 79;
-  --lilac-rgb: 31 138 138;
-  --sky-rgb: 255 220 166;
-  --muted-rgb: 201 164 104;
+  --desk: #5e7ff0;
+  --desk-line: rgb(0 0 0 / 0.1);
+  --sky: #ffd9c7;
+  --sky-rgb: 255 217 199;
 }
 
-/* Night — indigo sky, magenta-pink clouds, ember-orange hillside */
 [data-time-of-day='night'] {
-  --paper: #e9e0ef;
-  --ink: #1a1430;
-  --accent: #f0553f;
-  --accent-2: #d968a8;
-  --mint: #3d6b8a;
-  --lilac: #4a3d7a;
-  --sky: #6a5a9e;
-  --muted: #8078a0;
-  --bevel-light: #ded0ef;
-  --bevel-dark: #241a3d;
-  --checker-a: #ece3f2;
-  --checker-b: #ddd0e8;
-
-  --paper-rgb: 233 224 239;
-  --ink-rgb: 26 20 48;
-  --accent-rgb: 240 85 63;
-  --accent-2-rgb: 217 104 168;
-  --mint-rgb: 61 107 138;
-  --lilac-rgb: 74 61 122;
-  --sky-rgb: 106 90 158;
-  --muted-rgb: 128 120 160;
+  --accent: #ff4fa3;
+  --accent-rgb: 255 79 163;
+  --mint: #4ce0b3;
+  --mint-rgb: 76 224 179;
+  --lilac: #4b2ee0;
+  --lilac-rgb: 75 46 224;
+  --sky: #d9d2ff;
+  --sky-rgb: 217 210 255;
+  --desk: #4a33c9;
+  --desk-line: rgb(255 255 255 / 0.08);
+  --icon-shadow: #fff8ec;
+  --checker-b: #ffd6ec;
 }
 
 html,
@@ -111,7 +71,7 @@ body,
 }
 
 body {
-  background-color: var(--checker-a);
+  background-color: var(--desk);
   color: var(--ink);
   font-family: 'VT323', monospace;
   overflow: hidden;
@@ -149,10 +109,10 @@ body {
 }
 
 /*
-  Pixel edges. Instead of the old 3D bevel, every framed element gets a
-  crisp 2px ink outline with notched (missing) corner pixels, drawn with
-  box-shadows so it never shifts layout. Edge and drop shadow live in two
-  variables so .bevel and .shadow-pixel* compose instead of overriding.
+  Framing system. Every framed element gets a crisp 2px ink outline with a
+  small radius (windows use a larger one via --bevel-radius), plus an
+  optional hard offset shadow. Edge and drop live in two variables so
+  .bevel and .shadow-pixel* compose instead of overriding each other.
 */
 @layer utilities {
   .bevel,
@@ -168,30 +128,32 @@ body {
     box-shadow: var(--px-edge), var(--px-drop);
   }
 
-  .bevel {
-    --px-edge: 0 -2px 0 0 var(--ink), 0 2px 0 0 var(--ink), -2px 0 0 0 var(--ink), 2px 0 0 0 var(--ink);
-  }
-
-  /* Pressed / sunken: same outline plus an inner shade on the top-left. */
+  .bevel,
   .bevel-in {
-    --px-edge: inset 2px 2px 0 0 rgb(var(--ink-rgb) / 0.18), 0 -2px 0 0 var(--ink), 0 2px 0 0 var(--ink), -2px 0 0 0 var(--ink), 2px 0 0 0 var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: var(--bevel-radius, 6px);
   }
 
-  /* Hard offset drop shadows with a stepped corner. */
+  /* Pressed / sunken: an inner shade on the top-left. */
+  .bevel-in {
+    --px-edge: inset 2px 2px 0 0 rgb(var(--ink-rgb) / 0.14);
+  }
+
+  /* Hard offset drop shadows. */
   .shadow-pixel-sm {
-    --px-drop: 3px 2px 0 0 var(--ink), 2px 3px 0 0 var(--ink);
+    --px-drop: 2px 2px 0 0 var(--ink);
   }
 
   .shadow-pixel {
-    --px-drop: 5px 3px 0 0 var(--ink), 3px 5px 0 0 var(--ink);
+    --px-drop: 4px 4px 0 0 var(--ink);
   }
 
   .shadow-pixel-lg {
-    --px-drop: 9px 6px 0 0 var(--ink), 6px 9px 0 0 var(--ink);
+    --px-drop: 8px 8px 0 0 var(--ink);
   }
 
   .shadow-pixel-accent {
-    --px-drop: 5px 3px 0 0 var(--accent), 3px 5px 0 0 var(--accent);
+    --px-drop: 4px 4px 0 0 var(--accent);
   }
 
   .shadow-pixel-none {
@@ -210,41 +172,45 @@ body {
   }
 }
 
-/* Desktop wallpaper: pixel graph paper. Fine lines every 24px, a stronger
-   line every 5 squares, tinted by the time-of-day palette. */
+/* Desktop wallpaper: the bold desk colour with a faint pixel grid. */
 .bg-grid {
-  background-color: var(--checker-a);
+  background-color: var(--desk);
   background-image:
-    linear-gradient(rgb(var(--ink-rgb) / 0.12) 2px, transparent 2px),
-    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.12) 2px, transparent 2px),
-    linear-gradient(rgb(var(--ink-rgb) / 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.06) 1px, transparent 1px);
+    linear-gradient(var(--desk-line) 2px, transparent 2px),
+    linear-gradient(90deg, var(--desk-line) 2px, transparent 2px),
+    linear-gradient(var(--desk-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--desk-line) 1px, transparent 1px);
   background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
   background-position: -1px -1px;
+  transition: background-color 0.6s steps(6);
 }
 
-/* Flat pixel scrollbar: square thumb, no arrow buttons. */
+/* Pixel scrollbar: dithered track, outlined thumb. */
 .window-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgb(var(--ink-rgb) / 0.35) transparent;
+  scrollbar-color: var(--ink) transparent;
 }
 
 .window-scroll::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 }
 
 .window-scroll::-webkit-scrollbar-track {
-  background: transparent;
+  background-color: var(--paper);
+  background-image: conic-gradient(rgb(var(--ink-rgb) / 0.18) 25%, transparent 0 50%, rgb(var(--ink-rgb) / 0.18) 0 75%, transparent 0);
+  background-size: 4px 4px;
+  border-left: 2px solid var(--ink);
 }
 
 .window-scroll::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--ink-rgb) / 0.3);
-  border: 3px solid var(--paper);
+  background-color: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
 }
 
 .window-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: var(--accent);
+  background-color: var(--accent-2);
 }
 
 /* Blinking pixel cursor */

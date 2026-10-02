@@ -51,7 +51,7 @@ export function PeopleAlsoAsk() {
         gsap.set(el, { height: opening ? 'auto' : 0 });
         return;
       }
-      gsap.to(el, { height: opening ? 'auto' : 0, duration: 0.35, ease: opening ? 'back.out(1.4)' : 'power2.in' });
+      gsap.to(el, { height: opening ? 'auto' : 0, duration: 0.2, ease: 'steps(4)' });
     });
     setOpen(next);
   };

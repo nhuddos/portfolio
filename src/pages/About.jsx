@@ -15,7 +15,7 @@ import { CONTACT_LINKS, resolveLogoSrc } from '../data/contactLinks.js';
 import { asset } from '../assetUrl.js';
 import { khanhTexts, timeline, toolGroups } from '../data/profile.js';
 import gsap from 'gsap';
-import { reducedMotion, useEntrance, wiggle } from '../motion';
+import { reducedMotion, stepEase, useEntrance, wiggle } from '../motion';
 
 
 const rooms = [
@@ -87,9 +87,9 @@ function RoomAvatar({ room, size = 'md' }) {
 function Pop({ animate, children }) {
   return (
     <motion.div
-      initial={animate ? { opacity: 0, y: 12, scale: 0.96 } : false}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.18, ease: 'easeOut' }}
+      initial={animate ? { opacity: 0, scale: 0.6 } : false}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2, ease: stepEase(4) }}
       style={{ transformOrigin: 'bottom left' }}
       className="flex justify-start"
     >
@@ -133,14 +133,14 @@ function TypingBubble({ name }) {
   useEffect(() => {
     const dots = dotsRef.current?.children;
     if (!dots || reducedMotion()) return undefined;
-    const tween = gsap.to(dots, { y: -5, duration: 0.3, ease: 'power1.inOut', stagger: { each: 0.12, repeat: -1, yoyo: true } });
+    const tween = gsap.to(dots, { y: -5, duration: 0.3, ease: 'steps(2)', stagger: { each: 0.12, repeat: -1, yoyo: true } });
     return () => tween.kill();
   }, []);
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.1, ease: stepEase(1) }}
       className="flex justify-start"
       role="status"
       aria-label={`${name} is typing`}

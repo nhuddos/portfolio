@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useScreenInit } from '../useScreenInit.js';
 import { getProject } from '../data/projects';
-import { reducedMotion, revealChars } from '../motion';
+import { reducedMotion, revealChars, wipeIn } from '../motion';
 
 const storySections = [
   { id: 'challenge', label: 'The Challenge' },
@@ -53,7 +53,7 @@ function ProjectImage({ image, className = '' }) {
       observer.disconnect();
       gsap.timeline()
         .to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.7, ease: 'steps(10)' })
-        .fromTo(el.querySelector('img'), { scale: 1.12 }, { scale: 1, duration: 1.1, ease: 'expo.out', clearProps: 'transform' }, 0);
+        .fromTo(el.querySelector('img'), { scale: 1.12 }, { scale: 1, duration: 0.7, ease: 'steps(10)', clearProps: 'transform' }, 0);
     }, { root: el.closest('.window-scroll'), rootMargin: '0px 0px -10% 0px' });
     observer.observe(el);
     return () => observer.disconnect();
@@ -156,8 +156,8 @@ export function WorkDetail({ slug: slugProp } = {}) {
       gsap.to(el, {
         height: isActive ? 'auto' : 0,
         opacity: isActive ? 1 : 0,
-        duration: 0.35,
-        ease: 'power3.out'
+        duration: 0.2,
+        ease: 'steps(4)'
       });
     });
   }, [activeSection]);
@@ -165,13 +165,7 @@ export function WorkDetail({ slug: slugProp } = {}) {
   useEffect(() => {
     if (!project || !rootRef.current) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo('[data-reveal]', { opacity: 0, y: 18 }, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power3.out',
-        stagger: 0.08
-      });
+      wipeIn(rootRef.current.querySelectorAll('[data-reveal]'), { stagger: 0.08 });
     }, rootRef);
     const split = revealChars(titleRef.current, { delay: 0.1, stagger: 0.025 });
     return () => {

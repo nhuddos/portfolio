@@ -14,7 +14,7 @@ import { useIsNarrow } from '../useIsNarrow.js';
 import { PixelMusicIcon } from '../components/PixelIcons';
 import { tracks } from '../data/tracks';
 import gsap from 'gsap';
-import { hop, reducedMotion } from '../motion';
+import { hop, reducedMotion, stepEase } from '../motion';
 
 /* Four pixel bars that bounce while music plays and settle when paused. */
 function Equalizer({ playing }) {
@@ -23,7 +23,7 @@ function Equalizer({ playing }) {
     const bars = ref.current?.children;
     if (!bars) return undefined;
     if (!playing || reducedMotion()) {
-      gsap.to(bars, { scaleY: 0.25, duration: 0.3, ease: 'power2.out' });
+      gsap.to(bars, { scaleY: 0.25, duration: 0.2, ease: 'steps(3)' });
       return undefined;
     }
     const tween = gsap.to(bars, {
@@ -84,7 +84,7 @@ export function Music() {
   /* New track: its title slides in from the right. */
   useEffect(() => {
     if (!titleRef.current || reducedMotion()) return;
-    gsap.fromTo(titleRef.current, { x: 16, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: 'back.out(2)', clearProps: 'transform,opacity' });
+    gsap.fromTo(titleRef.current, { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.3, ease: 'steps(6)', clearProps: 'clipPath' });
   }, [index]);
 
   // Keep the <audio> element's native loop attribute in sync with our toggle.
@@ -173,16 +173,11 @@ export function Music() {
 
       {/* Cover art */}
       <div className={`flex flex-col items-center justify-center gap-6 ${isNarrow ? 'flex-1' : ''}`}>
-        <motion.div animate={{
-          rotate: isPlaying ? 360 : 0
-        }} transition={{
-          repeat: isPlaying ? Infinity : 0,
-          duration: 6,
-          ease: 'linear'
-        }} className="grid aspect-square w-full max-w-[260px] shrink-0 place-items-center bevel bg-accent-2  ">
-
-          <PixelMusicIcon size={64} />
-        </motion.div>
+        <div className="grid aspect-square w-full max-w-[260px] shrink-0 place-items-center bevel bg-accent-2 shadow-pixel [--bevel-radius:12px]">
+          <motion.div animate={{ rotate: isPlaying ? 360 : 0 }} transition={{ repeat: isPlaying ? Infinity : 0, duration: 2.4, ease: stepEase(8) }}>
+            <PixelMusicIcon size={64} />
+          </motion.div>
+        </div>
 
         <div className="w-full max-w-[260px] text-center">
           <p ref={titleRef} className="flex items-center justify-center gap-2 font-mono text-lg leading-relaxed">
@@ -251,7 +246,7 @@ export function Music() {
         }} transition={{
           repeat: isPlaying ? Infinity : 0,
           duration: 4,
-          ease: 'linear'
+          ease: stepEase(8)
         }}>
 
           <PixelMusicIcon size={32} />
