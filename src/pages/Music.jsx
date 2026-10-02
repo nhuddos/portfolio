@@ -63,6 +63,22 @@ export function Music() {
   const [duration, setDuration] = useState(0);
 
   const track = hasTracks ? tracks[index] : null;
+
+  /* Use the large player whenever the window has room for it (e.g. when
+     maximized), not just on phones. */
+  const rootRef = useRef(null);
+  const [roomy, setRoomy] = useState(false);
+  useEffect(() => {
+    const scroller = rootRef.current?.closest('.window-scroll');
+    if (!scroller) return undefined;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setRoomy(width >= 560 && height >= 520);
+    });
+    ro.observe(scroller);
+    return () => ro.disconnect();
+  }, []);
+  const big = isNarrow || roomy;
   const titleRef = useRef(null);
 
   /* New track: its title slides in from the right. */
@@ -149,14 +165,14 @@ export function Music() {
     </div>);
   }
 
-  if (isNarrow) {
-    return (<div className="flex h-full flex-col gap-6 p-6">
+  if (big) {
+    return (<div ref={rootRef} className="mx-auto flex h-full w-full max-w-md flex-col justify-center gap-6 p-6">
       <p className="shrink-0 text-center font-mono text-lg uppercase tracking-[0.2em] text-ink/40">
         Now Playing
       </p>
 
       {/* Cover art */}
-      <div className="flex flex-1 flex-col items-center justify-center gap-6">
+      <div className={`flex flex-col items-center justify-center gap-6 ${isNarrow ? 'flex-1' : ''}`}>
         <motion.div animate={{
           rotate: isPlaying ? 360 : 0
         }} transition={{
@@ -226,7 +242,7 @@ export function Music() {
     </div>);
   }
 
-  return (<div className="mx-auto flex h-full w-full max-w-sm flex-col justify-center gap-4 p-4">
+  return (<div ref={rootRef} className="mx-auto flex h-full w-full max-w-sm flex-col justify-center gap-4 p-4">
     {/* Icon + title + loop */}
     <div className="flex items-center gap-3">
       <div className="grid h-14 w-14 shrink-0 place-items-center bevel bg-accent-2  ">

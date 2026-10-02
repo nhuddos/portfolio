@@ -21,20 +21,6 @@ const matches = (p, active, q) => {
   return [p.title, p.summary, p.category, p.year, ...(p.tags || [])].join(' ').toLowerCase().includes(q);
 };
 
-/* Section divider with pinstripes, like an old Mac window's title bar. */
-function SectionBar({ children, count }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="pinstripe h-[14px] flex-1 opacity-70" aria-hidden="true" />
-      <h2 className="shrink-0 font-mono text-xl uppercase leading-none text-ink">
-        {children}
-        <span className="ml-2 text-ink/40">({count})</span>
-      </h2>
-      <span className="pinstripe h-[14px] flex-1 opacity-70" aria-hidden="true" />
-    </div>
-  );
-}
-
 export function Works() {
   useScreenInit();
   const navigate = useNavigate();
@@ -91,8 +77,7 @@ export function Works() {
     <div className="min-w-0 flex-1 space-y-12">
 
       {filtered.length > 0 && <div>
-        <SectionBar count={filtered.length}>Featured</SectionBar>
-        <div className={"mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3"}>
+        <div className="grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((project, i) => <div key={project.slug} data-flip-id={project.slug} className="h-full">
             <ProjectCard project={project} index={i} />
           </div>)}
@@ -102,8 +87,7 @@ export function Works() {
       {isLanding && <PeopleAlsoAsk />}
 
       {filteredMore.length > 0 && <div>
-        <SectionBar count={filteredMore.length}>More results</SectionBar>
-        <div className="mt-8 flex max-w-3xl flex-col gap-7">
+        <div className="flex max-w-3xl flex-col gap-4">
           {filteredMore.map((project, i) => <div key={project.slug} data-flip-id={`more-${project.slug}`}>
             <ResultLink project={project} index={i} />
           </div>)}

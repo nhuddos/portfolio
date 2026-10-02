@@ -10,6 +10,7 @@ import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
 import { PopupStorm } from './PopupStorm';
 import { SecretFile } from './SecretFile';
+import { AppErrorBoundary } from './AppErrorBoundary';
 import { pixelBurst, wiggle } from '../motion';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
 function getTimeOfDay(date = new Date()) {
@@ -192,9 +193,11 @@ export function Desktop() {
 
     {windows.map((win) => <Window key={win.id} win={win} isNarrow={isNarrow} hold={!revealed}>
 
-      <Suspense fallback={null}>
-        {appRegistry[win.appId].render(win.slug)}
-      </Suspense>
+      <AppErrorBoundary name={appRegistry[win.appId].label}>
+        <Suspense fallback={null}>
+          {appRegistry[win.appId].render(win.slug)}
+        </Suspense>
+      </AppErrorBoundary>
     </Window>)}
 
     {revealed && windows.length === 0 &&
