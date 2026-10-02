@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { Flip } from 'gsap/Flip';
@@ -6,15 +6,14 @@ import { DicesIcon, MicIcon, SearchIcon, XIcon } from 'lucide-react';
 import { useScreenInit } from '../useScreenInit.js';
 import { ProjectCard } from '../components/ProjectCard';
 import { ResultLink } from '../components/ResultLink';
-import { ImageResults, KhanhOverview, KnowledgePanel, Pagination, PeopleAlsoAsk, SearchLogo } from '../components/SearchExtras';
-import { imagesFor, projects } from '../data/projects';
+import { Pagination, PeopleAlsoAsk, SearchLogo } from '../components/SearchExtras';
+import { projects } from '../data/projects';
 import { moreProjects } from '../data/moreProjects';
 import { hop, reducedMotion, useEntrance, wiggle } from '../motion';
 
 gsap.registerPlugin(Flip);
 
 const TOTAL = projects.length + moreProjects.length;
-const WIDE = 980; // window width (px) at which the knowledge panel docks on the right
 
 const matches = (p, active, q) => {
   if (active !== 'All' && p.category !== active) return false;
@@ -41,22 +40,11 @@ export function Works() {
   const navigate = useNavigate();
   const categories = useMemo(() => Array.from(new Set([...projects, ...moreProjects].map((p) => p.category).filter(Boolean))), []);
   const [active, setActive] = useState('All');
-  const [view, setView] = useState('all'); // 'all' | 'images'
   const [query, setQuery] = useState('');
   const [listening, setListening] = useState(false);
-  const [wide, setWide] = useState(false);
   const rootRef = useRef(null);
   const flipState = useRef(null);
   useEntrance(rootRef);
-
-  /* Dock the knowledge panel beside the results when the window is wide. */
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return undefined;
-    const ro = new ResizeObserver(([entry]) => setWide(entry.contentRect.width >= WIDE));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   /* Snapshot result positions before a change so Flip can glide them. */
   const withFlip = (update) => {
@@ -67,10 +55,9 @@ export function Works() {
   const q = query.trim().toLowerCase();
   const filtered = useMemo(() => projects.filter((p) => matches(p, active, q)), [active, q]);
   const filteredMore = useMemo(() => moreProjects.filter((p) => matches(p, active, q)), [active, q]);
-  const imageCount = useMemo(() => imagesFor(filtered).length, [filtered]);
-  const resultCount = view === 'images' ? imageCount : filtered.length + filteredMore.length;
+  const resultCount = filtered.length + filteredMore.length;
   const fakeSeconds = (0.02 + resultCount * 0.015).toFixed(2);
-  const isLanding = view === 'all' && active === 'All' && !q;
+  const isLanding = active === 'All' && !q;
 
   useLayoutEffect(() => {
     const state = flipState.current;
@@ -85,18 +72,9 @@ export function Works() {
         opacity: 1, scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2)', stagger: 0.03, clearProps: 'transform,opacity'
       })
     });
-  }, [active, query, view]);
+  }, [active, query]);
 
-  const pickTab = (tab) => withFlip(() => {
-    if (tab === 'Images') {
-      setView('images');
-      setActive('All');
-    } else {
-      setView('all');
-      setActive(tab);
-    }
-  });
-  const activeTab = view === 'images' ? 'Images' : active;
+  const pickTab = (tab) => withFlip(() => setActive(tab));
 
   const onMic = (e) => {
     hop(e.currentTarget, 6);
@@ -111,12 +89,10 @@ export function Works() {
 
   const results = (
     <div className="min-w-0 flex-1 space-y-12">
-      {isLanding && <KhanhOverview onPickCategory={pickTab} />}
-      {isLanding && !wide && <KnowledgePanel />}
 
       {filtered.length > 0 && <div>
         <SectionBar count={filtered.length}>Featured</SectionBar>
-        <div className={`mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 ${wide ? '' : 'xl:grid-cols-3'}`}>
+        <div className={"mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3"}>
           {filtered.map((project, i) => <div key={project.slug} data-flip-id={project.slug} className="h-full">
             <ProjectCard project={project} index={i} />
           </div>)}
@@ -181,8 +157,8 @@ export function Works() {
 
       {/* Tabs */}
       <div className="mt-6 flex gap-6 overflow-x-auto" role="tablist" aria-label="Filter projects">
-        {['All', 'Images', ...categories].map((tab) => {
-          const isActive = tab === activeTab;
+        {['All', ...categories].map((tab) => {
+          const isActive = tab === active;
           return (
             <button
               key={tab}
@@ -202,20 +178,11 @@ export function Works() {
 
     <section className="w-full px-6 pb-14 pt-4 sm:px-8">
       <p className="font-mono text-lg leading-none text-ink/45">
-        About {resultCount} {view === 'images' ? 'image' : 'result'}{resultCount === 1 ? '' : 's'} ({fakeSeconds} seconds) &middot; {String(TOTAL).padStart(2, '0')} projects indexed
+        About {resultCount} result{resultCount === 1 ? '' : 's'} ({fakeSeconds} seconds) &middot; {String(TOTAL).padStart(2, '0')} projects indexed
       </p>
 
       <div className="mt-6">
-        {view === 'images' ?
-          <ImageResults list={filtered} /> :
-          wide ?
-            <div className="flex items-start gap-10">
-              {results}
-              <div className="sticky top-6 w-[300px] shrink-0">
-                <KnowledgePanel />
-              </div>
-            </div> :
-            results}
+        {results}
       </div>
     </section>
   </div>);

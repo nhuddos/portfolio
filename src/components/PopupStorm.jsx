@@ -46,6 +46,21 @@ const SCRIPT = [
   say('Warning', 'warn', 'please please please', ['OK', 'OK', 'OK'])
 ].filter((entry) => entry.image == null || entry.image < IMAGES.length);
 
+// The professor's fault. Slotted in at a random point in each storm (never
+// first, since the "are you sure" popup opens the show).
+const CONFESSION = {
+  title: 'README.txt',
+  kind: 'info',
+  text: "if you cringe at this portfolio then i have succeeded because this used to be a normal portfolio but my professor told me it said nothing about me so now you're bombarded with this bullcrap. ur welcome dawg o(\u2267\u2207\u2266o) if you were put off by anything, it was him and if you want to hire me then it was my idea all along.",
+  buttons: ['OK', 'Hire']
+};
+
+function buildScript() {
+  const script = [...SCRIPT];
+  script.splice(1 + Math.floor(Math.random() * script.length), 0, CONFESSION);
+  return script;
+}
+
 // Held back until every other popup has been closed.
 const FINALE = { title: 'Hello?', kind: 'question', text: 'you still here?', buttons: ['Yes', 'Yes'] };
 
@@ -136,8 +151,9 @@ function makePopup(entry, area, { center = false } = {}) {
   const W = area?.clientWidth ?? window.innerWidth;
   const H = area?.clientHeight ?? window.innerHeight;
   const isImage = entry.image != null;
-  const width = Math.min(isImage ? Math.round(rand(280, 380)) : Math.round(rand(300, 360)), W - 16);
-  const estHeight = isImage ? width * 0.625 + 110 : 180;
+  const isLong = !isImage && (entry.text?.length ?? 0) > 120;
+  const width = Math.min(isImage ? Math.round(rand(280, 380)) : isLong ? Math.round(rand(420, 460)) : Math.round(rand(300, 360)), W - 16);
+  const estHeight = isImage ? width * 0.625 + 110 : isLong ? 300 : 180;
   let x;
   let y;
   if (center) {
@@ -254,15 +270,16 @@ export function PopupStorm({ onDone }) {
 
   // Spawn the storm: starts at a steady pace and speeds up.
   useEffect(() => {
+    const script = buildScript();
     let i = 0;
     let delay = 300;
     let timer;
     const tick = () => {
-      const entry = SCRIPT[i];
+      const entry = script[i];
       setPopups((prev) => [...prev, makePopup(entry, areaRef.current, { center: i === 0 })]);
       playPing();
       i += 1;
-      if (i >= SCRIPT.length) {
+      if (i >= script.length) {
         setPhase('waiting');
         return;
       }

@@ -9,6 +9,7 @@ import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
 import { PopupStorm } from './PopupStorm';
+import { SecretFile } from './SecretFile';
 import { pixelBurst, wiggle } from '../motion';
 import { appForPath, appRegistry, desktopApps, routeFor, titleFor } from './appRegistry';
 function getTimeOfDay(date = new Date()) {
@@ -186,6 +187,8 @@ export function Desktop() {
   const leftIcons = leftApps.map(renderIcon);
   const rightIcons = rightApps.map(renderIcon);
   const windowLayer = <>
+    {/* Hidden under the windows; only visible once they're all closed. */}
+    {revealed && <SecretFile />}
 
     {windows.map((win) => <Window key={win.id} win={win} isNarrow={isNarrow} hold={!revealed}>
 
@@ -195,7 +198,7 @@ export function Desktop() {
     </Window>)}
 
     {revealed && windows.length === 0 &&
-      <div className="flex h-full items-center justify-center">
+      <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
         <p className="bevel bg-paper/80 px-4 py-3 font-mono text-lg uppercase text-ink/70">
           Click a shortcut to open a window
         </p>
