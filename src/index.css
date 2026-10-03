@@ -246,6 +246,35 @@ body {
   cursor: grabbing;
 }
 
+/* The secret file's forcefield: two dashed rings pulsing outward in steps.
+   --field (set from JS) shrinks the ring as the field wears out. */
+@keyframes field-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(calc(var(--field, 1) * 0.85));
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(var(--field, 1));
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(calc(var(--field, 1) * 0.85));
+  }
+}
+
+.forcefield {
+  border: 3px dashed var(--icon-label);
+  box-shadow: 0 0 0 10px rgb(var(--sky-rgb) / 0.25), inset 0 0 0 10px rgb(var(--sky-rgb) / 0.25);
+  transform: translate(-50%, -50%);
+  animation: field-pulse 0.8s steps(4) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forcefield {
+    animation: none;
+  }
+}
+
 /* Desk doodle sparkles: two-frame twinkle, each offset by --d. */
 @keyframes twinkle {
   0%,
