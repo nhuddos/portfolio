@@ -73,14 +73,14 @@ export function Taskbar({ onRestart }) {
   return (<div data-taskbar className="relative z-[60] shrink-0 px-2.5 pb-3 pt-1 sm:px-4 sm:pb-4">
     <div className="flex items-center gap-2 bevel bg-paper px-2 py-2 shadow-pixel [--bevel-radius:8px] [--bevel-w:3px] sm:gap-3">
     <div className="relative" data-start-region>
-      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 h-12 rounded-[4px] border-2 border-ink px-3 font-chunky text-base uppercase leading-none max-md:text-[18px] sm:h-11 ${startOpen ? 'bg-ink text-paper' : 'bg-accent-2 text-ink hover:bg-accent'}`}>
+      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 h-12 rounded-[4px] border-2 border-ink px-3 font-chunky text-base uppercase leading-none sm:h-11 ${startOpen ? 'bg-ink text-paper' : 'bg-accent-2 text-ink hover:bg-accent'}`}>
         <span className="grid h-5 w-5 shrink-0 grid-cols-2 gap-[2px]" aria-hidden>
           <i className="bg-accent" />
           <i className="bg-mint" />
           <i className="bg-lilac" />
           <i className="bg-ink" />
         </span>
-        Start
+        <span className="max-[400px]:hidden">Start</span>
       </button>
 
       {startOpen &&
@@ -152,7 +152,7 @@ export function Taskbar({ onRestart }) {
     >
       <div className="flex items-center gap-1.5 px-2.5 py-1.5 font-mono text-lg uppercase leading-none tracking-wide max-md:text-[20px] sm:gap-2.5 sm:px-4 sm:py-2 sm:text-xl">
         <span className="pixel-blink h-2.5 w-2.5 shrink-0 bg-mint shadow-[0_0_0_2px_var(--ink)]" aria-hidden />
-        <span className="sm:hidden">Available</span>
+        <span className="max-[400px]:hidden sm:hidden">Available</span>
         <span className="hidden sm:inline">Available for work</span>
       </div>
 

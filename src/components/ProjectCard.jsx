@@ -3,22 +3,23 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { stepEase } from '../motion';
 
+const wipe = {
+  hidden: { clipPath: 'inset(0% 0% 100% 0%)' },
+  shown: { clipPath: 'inset(0% 0% 0% 0%)' }
+};
+
 export function ProjectCard({ project, index = 0 }) {
   /* Cards wipe in top-to-bottom in hard steps as they scroll into view,
-     and lift off the page with a hard shadow on hover. */
-  return (<motion.article initial={{
-    clipPath: 'inset(0% 0% 100% 0%)'
-  }} whileInView={{
-    clipPath: 'inset(0% 0% 0% 0%)'
-  }} viewport={{
-    once: true,
-    margin: '-40px'
-  }} transition={{
-    duration: 0.36,
-    ease: stepEase(6),
-    delay: index % 3 * 0.08
-  }} className="h-full">
-
+     and lift off the page with a hard shadow on hover. The clip lives on an
+     inner layer: browsers treat a fully clipped element as out of view, so
+     clipping the observed card itself means it would never reveal (this
+     broke Works on phones). */
+  return (<motion.article initial="hidden" whileInView="shown" viewport={{ once: true }} className="h-full">
+    <motion.div
+      variants={wipe}
+      transition={{ duration: 0.36, ease: stepEase(6), delay: index % 3 * 0.08 }}
+      className="h-full"
+    >
     <Link to={`/works/${project.slug}`} className="group flex h-full flex-col overflow-hidden bevel bg-paper transition-[transform,box-shadow] duration-150 [transition-timing-function:steps(2)] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-pixel focus:outline-none focus-visible:-translate-x-1 focus-visible:-translate-y-1 focus-visible:shadow-pixel">
 
       <div className="aspect-[16/10] w-full shrink-0 overflow-hidden border-b-2 border-ink">
@@ -42,5 +43,6 @@ export function ProjectCard({ project, index = 0 }) {
         </div>
       </div>
     </Link>
+    </motion.div>
   </motion.article>);
 }
