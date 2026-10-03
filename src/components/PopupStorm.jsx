@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { AlertTriangleIcon, HelpCircleIcon, InfoIcon, XIcon } from 'lucide-react';
+import { AlertTriangleIcon, HelpCircleIcon, InfoIcon } from 'lucide-react';
+import { WindowGlyph } from './WindowGlyph';
 import { asset } from '../assetUrl.js';
 
 /* ------------------------------------------------------------------ */
@@ -61,7 +62,7 @@ const FINALE = { title: 'Hello?', kind: 'question', text: 'you still here?', but
 
 const KIND_STYLE = {
   warn: { Icon: AlertTriangleIcon, bg: 'bg-accent' },
-  question: { Icon: HelpCircleIcon, bg: 'bg-sky' },
+  question: { Icon: HelpCircleIcon, bg: 'bg-accent-2' },
   info: { Icon: InfoIcon, bg: 'bg-mint' }
 };
 
@@ -210,22 +211,21 @@ function Popup({ popup, onClose }) {
       aria-labelledby={titleId}
       aria-describedby={bodyId}
       style={{ left: popup.x, top: popup.y, width: popup.width }}
-      className="absolute flex flex-col overflow-hidden bevel bg-paper shadow-pixel-lg [--bevel-radius:10px]"
+      className="absolute flex flex-col overflow-hidden bevel bg-paper shadow-pixel-lg [--bevel-radius:8px] [--bevel-w:3px]"
     >
-      <div className="flex items-center gap-2 border-b-2 border-ink px-2 py-1.5">
+      <div className="flex items-center gap-2.5 border-b-[3px] border-ink bg-sky py-1.5 pl-3 pr-2">
+        <span id={titleId} className="min-w-0 truncate font-chunky text-[15px] uppercase leading-none text-ink">
+          {popup.title}
+        </span>
+        <span className="rail-dots h-1 min-w-[10px] flex-1" aria-hidden="true" />
         <button
           type="button"
           onClick={close}
           aria-label={`Close ${popup.title}`}
-          className="grid h-6 w-6 shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink hover:bg-accent active:translate-y-px"
+          className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[3px] border-2 border-ink bg-accent text-paper active:translate-y-px"
         >
-          <XIcon size={13} strokeWidth={3} />
+          <WindowGlyph name="close" />
         </button>
-        <span className="pinstripe h-[10px] min-w-[10px] flex-1" aria-hidden="true" />
-        <span id={titleId} className="min-w-0 truncate px-1 font-mono text-lg leading-none text-ink">
-          {popup.title}
-        </span>
-        <span className="pinstripe h-[10px] min-w-[10px] flex-1" aria-hidden="true" />
       </div>
 
       {popup.image ?
@@ -250,7 +250,7 @@ function Popup({ popup, onClose }) {
             ref={i === 0 ? firstButton : undefined}
             type="button"
             onClick={close}
-            className="min-w-[5.5rem] bevel bg-paper px-4 py-1.5 shadow-pixel-sm active:shadow-pixel-none font-mono text-lg leading-none text-ink hover:bg-accent-2 focus:outline-none focus-visible:outline-dashed focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-ink active:translate-y-0.5"
+            className="min-w-[5.5rem] bevel bg-paper px-4 py-1.5 shadow-pixel-sm active:shadow-pixel-none font-chunky text-sm uppercase leading-none text-ink hover:bg-accent-2 focus:outline-none focus-visible:outline-dashed focus-visible:outline-2 focus-visible:outline-offset-[-6px] focus-visible:outline-ink active:translate-y-0.5"
           >
             {label}
           </button>

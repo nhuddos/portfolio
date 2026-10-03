@@ -183,7 +183,7 @@ const TOOLS = [
 
 const PALETTE = [
   'var(--ink)', 'var(--bevel-dark)', 'var(--muted)', 'var(--lilac)', 'var(--mint)', 'var(--sky)',
-  'var(--accent)', 'var(--accent-2)', 'var(--paper)', '#ffffff', '#e0526b', '#8b5cf6'
+  'var(--accent)', 'var(--accent-2)', 'var(--paper)', '#ffffff', '#f2a7bf', '#b7a3e3'
 ];
 
 const DEFAULT_WORD_COLOR = { visual: 'var(--ink)', designer: 'var(--accent)' };

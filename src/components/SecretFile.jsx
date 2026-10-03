@@ -56,7 +56,7 @@ export function SecretFile() {
       <span className="transition-transform duration-150 group-hover:-translate-y-1 group-active:translate-y-0.5">
         <PixelDoc />
       </span>
-      <span className="rounded-[4px] border-2 border-ink bg-paper px-1.5 py-0.5 font-mono text-lg uppercase leading-tight text-ink group-hover:bg-accent-2 group-focus-visible:bg-accent-2">
+      <span className="rounded-[3px] border-2 border-transparent px-1.5 py-0.5 font-mono text-xl uppercase leading-tight text-[color:var(--icon-label)] group-hover:border-ink group-hover:bg-accent-2 group-hover:text-ink group-focus-visible:border-ink group-focus-visible:bg-accent-2 group-focus-visible:text-ink">
         Super secret do not open
       </span>
     </a>

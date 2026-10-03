@@ -9,6 +9,7 @@ import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { BootScreen } from './BootScreen';
 import { ConfessionPopup, PopupStorm } from './PopupStorm';
+import { DeskDoodles } from './DeskDoodles';
 import { SecretFile } from './SecretFile';
 import { AppErrorBoundary } from './AppErrorBoundary';
 import { pixelBurst, setZoomOrigin, wiggle } from '../motion';
@@ -173,7 +174,7 @@ export function Desktop() {
         style={{ '--icon-fill': `color-mix(in srgb, ${app.tint} 55%, var(--paper))` }}
         className="transition-transform duration-150 [transition-timing-function:steps(2)] [filter:drop-shadow(3px_3px_0_var(--icon-shadow))] group-hover:-translate-y-1 group-active:translate-y-0.5"
       />
-      <span className={`rounded-[4px] border-2 border-ink px-1.5 py-0.5 font-mono text-lg leading-none group-hover:bg-accent-2 group-hover:text-ink group-focus-visible:bg-accent-2 ${isRunning ? 'bg-ink text-paper' : 'bg-paper text-ink'}`}>
+      <span className={`rounded-[3px] border-2 px-1.5 py-0.5 font-mono text-xl leading-none group-hover:border-ink group-hover:bg-accent-2 group-hover:text-ink group-focus-visible:border-ink group-focus-visible:bg-accent-2 group-focus-visible:text-ink ${isRunning ? 'border-ink bg-ink text-paper' : 'border-transparent text-[color:var(--icon-label)]'}`}>
 
         {app.label}
       </span>
@@ -199,7 +200,7 @@ export function Desktop() {
 
     {revealed && windows.length === 0 &&
       <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center">
-        <p className="bevel bg-paper/80 px-4 py-3 font-mono text-lg uppercase text-ink/70">
+        <p className="bevel bg-paper px-4 py-3 font-mono text-lg uppercase text-ink/70">
           Click a shortcut to open a window
         </p>
       </div>}
@@ -255,6 +256,7 @@ export function Desktop() {
           </div>}
       </div>) : (
       <div className="relative min-h-0 flex-1">
+        <DeskDoodles />
         <div ref={dockRef} className="contents">
           <aside className="absolute bottom-0 left-0 top-0 z-10 flex w-28 flex-col items-center gap-9 py-6" aria-label="Desktop shortcuts">
 

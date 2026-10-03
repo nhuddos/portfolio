@@ -71,9 +71,9 @@ export function Taskbar({ onRestart }) {
   }, [startOpen]);
 
   return (<div data-taskbar className="relative z-[60] shrink-0 px-2.5 pb-3 pt-1 sm:px-4 sm:pb-4">
-    <div className="flex items-center gap-2 bevel bg-paper px-2 py-2 shadow-pixel [--bevel-radius:12px] sm:gap-3">
+    <div className="flex items-center gap-2 bevel bg-paper px-2 py-2 shadow-pixel [--bevel-radius:8px] [--bevel-w:3px] sm:gap-3">
     <div className="relative" data-start-region>
-      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 rounded-md border-2 border-ink px-3 py-2 text-lg uppercase max-md:text-[22px] sm:py-1.5 sm:text-xl ${startOpen ? 'bg-ink text-paper' : 'bg-accent-2 text-ink hover:bg-accent'}`}>
+      <button onClick={() => setStartOpen((v) => !v)} onMouseEnter={(e) => hop(e.currentTarget.firstElementChild, 6)} aria-expanded={startOpen} aria-label="Start menu" className={`flex items-center gap-2.5 rounded-[4px] border-2 border-ink px-3 py-2 font-chunky text-base uppercase leading-none max-md:text-[18px] sm:py-1.5 ${startOpen ? 'bg-ink text-paper' : 'bg-accent-2 text-ink hover:bg-accent'}`}>
         <span className="grid h-5 w-5 shrink-0 grid-cols-2 gap-[2px]" aria-hidden>
           <i className="bg-accent" />
           <i className="bg-mint" />
@@ -84,7 +84,7 @@ export function Taskbar({ onRestart }) {
       </button>
 
       {startOpen &&
-        <div ref={menuRef} className="absolute bottom-full left-0 mb-4 w-[min(20rem,calc(100vw-1.5rem))] bevel bg-paper p-2 shadow-pixel-lg [--bevel-radius:12px]">
+        <div ref={menuRef} className="absolute bottom-full left-0 mb-4 w-[min(20rem,calc(100vw-1.5rem))] bevel bg-paper p-2 shadow-pixel-lg [--bevel-radius:8px] [--bevel-w:3px]">
 
           <div className="mb-2 rounded-md bg-ink px-3 py-3 font-handjet text-3xl uppercase leading-none tracking-wide text-paper">
             Khanh Do

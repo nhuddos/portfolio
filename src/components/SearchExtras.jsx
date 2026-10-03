@@ -26,12 +26,12 @@ const QUESTIONS = [
   { q: 'Has Khanh coded any visual novels?', a: 'yes but youll have to hire me before you can play them teehee' }
 ];
 
-/* Section header: label plus a pinstripe bar, matching the result sections. */
+/* Section header: label plus a dotted rail, matching the result sections. */
 function PanelTitle({ children }) {
   return (
     <div className="flex items-center gap-2.5">
       <h2 className="shrink-0 font-mono text-xl uppercase leading-none text-ink">{children}</h2>
-      <span className="pinstripe h-[12px] flex-1 opacity-50" aria-hidden="true" />
+      <span className="rail-dots h-1 flex-1 opacity-60" aria-hidden="true" />
     </div>
   );
 }

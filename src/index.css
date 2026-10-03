@@ -5,63 +5,58 @@
 
 
 /*
-  Palette. Windows are always warm cream with near-black ink, for contrast;
-  what changes with the visitor's time of day is the bold desktop colour
-  and the accents:
-    morning   — fresh green desk, tangerine + sunshine accents
-    afternoon — cobalt-blue desk, tangerine + sunshine accents
-    night     — electric-violet desk, hot-pink + sunshine accents
-  --desk / --desk-line drive the wallpaper; everything else is a role
-  token (paper = surface, ink = text/lines, accent = action, lilac = links).
+  Palette: soft stationery colours (think riso prints and old folder tabs),
+  never neon. Windows are warm cream with navy ink lines; what changes with
+  the visitor's time of day is the desk colour behind them:
+    morning   — sage mint desk
+    afternoon — periwinkle desk
+    night     — deep indigo desk with cream doodles
+  --desk / --desk-line / --doodle drive the wallpaper; everything else is a
+  role token (paper = surface, ink = text/lines, accent = action/close,
+  accent-2 = highlight, sky = focused title bars, lilac = links).
 */
 :root,
 [data-time-of-day='morning'] {
-  --paper: #fff8ec;
-  --ink: #17141f;
-  --accent: #ff5c39;
-  --accent-2: #ffd447;
-  --mint: #2fcb8f;
-  --lilac: #3346e0;
-  --sky: #bfe6ff;
-  --muted: #8a8494;
+  --paper: #fdf7e9;
+  --ink: #2a2c55;
+  --accent: #ec6a52;
+  --accent-2: #f6d06b;
+  --mint: #95d3b5;
+  --lilac: #4a58c0;
+  --sky: #c9d5f6;
+  --muted: #8d8aa3;
   --bevel-light: #ffffff;
-  --bevel-dark: #17141f;
-  --desk: #5ad25e;
-  --desk-line: rgb(0 0 0 / 0.09);
-  --icon-shadow: #17141f;
-  --checker-a: #fff8ec;
-  --checker-b: #ffe9b8;
+  --bevel-dark: #2a2c55;
+  --desk: #b4d9c6;
+  --desk-line: rgb(42 44 85 / 0.08);
+  --doodle: rgb(42 44 85 / 0.16);
+  --icon-shadow: #2a2c55;
+  --icon-label: #2a2c55;
+  --checker-a: #fdf7e9;
+  --checker-b: #f8e7bd;
 
-  --paper-rgb: 255 248 236;
-  --ink-rgb: 23 20 31;
-  --accent-rgb: 255 92 57;
-  --accent-2-rgb: 255 212 71;
-  --mint-rgb: 47 203 143;
-  --lilac-rgb: 51 70 224;
-  --sky-rgb: 191 230 255;
-  --muted-rgb: 138 132 148;
+  --paper-rgb: 253 247 233;
+  --ink-rgb: 42 44 85;
+  --accent-rgb: 236 106 82;
+  --accent-2-rgb: 246 208 107;
+  --mint-rgb: 149 211 181;
+  --lilac-rgb: 74 88 192;
+  --sky-rgb: 201 213 246;
+  --muted-rgb: 141 138 163;
 }
 
 [data-time-of-day='afternoon'] {
-  --desk: #5e7ff0;
-  --desk-line: rgb(0 0 0 / 0.1);
-  --sky: #ffd9c7;
-  --sky-rgb: 255 217 199;
+  --desk: #b9c4ee;
+  --sky: #f6dcc6;
+  --sky-rgb: 246 220 198;
 }
 
 [data-time-of-day='night'] {
-  --accent: #ff4fa3;
-  --accent-rgb: 255 79 163;
-  --mint: #4ce0b3;
-  --mint-rgb: 76 224 179;
-  --lilac: #4b2ee0;
-  --lilac-rgb: 75 46 224;
-  --sky: #d9d2ff;
-  --sky-rgb: 217 210 255;
-  --desk: #4a33c9;
-  --desk-line: rgb(255 255 255 / 0.08);
-  --icon-shadow: #fff8ec;
-  --checker-b: #ffd6ec;
+  --desk: #2e3163;
+  --desk-line: rgb(253 247 233 / 0.06);
+  --doodle: rgb(253 247 233 / 0.22);
+  --icon-shadow: #fdf7e9;
+  --icon-label: #fdf7e9;
 }
 
 html,
@@ -98,6 +93,13 @@ body {
   font-weight: 400;
 }
 
+/* Chunky bitmap caps for chrome: window titles, buttons, the Start button. */
+.font-chunky {
+  font-family: "Silkscreen", "VT323", monospace;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
 .font-body {
   font-family: "Instrument Sans", sans-serif;
   font-weight: 400;
@@ -130,7 +132,7 @@ body {
 
   .bevel,
   .bevel-in {
-    border: 2px solid var(--ink);
+    border: var(--bevel-w, 2px) solid var(--ink);
     border-radius: var(--bevel-radius, 6px);
   }
 
@@ -165,6 +167,11 @@ body {
     background-image: repeating-linear-gradient(to bottom, var(--ink) 0 2px, transparent 2px 4px);
   }
 
+  /* A rail of chunky dots, for title bars. */
+  .rail-dots {
+    background-image: repeating-linear-gradient(90deg, rgb(var(--ink-rgb) / 0.5) 0 4px, transparent 4px 9px);
+  }
+
   /* 50% ordered dither, for quiet fills (unfocused title bars, tracks). */
   .dither {
     background-image: conic-gradient(rgb(var(--ink-rgb) / 0.14) 25%, transparent 0 50%, rgb(var(--ink-rgb) / 0.14) 0 75%, transparent 0);
@@ -172,7 +179,7 @@ body {
   }
 }
 
-/* Desktop wallpaper: the bold desk colour with a faint pixel grid. */
+/* Desktop wallpaper: the soft desk colour with a faint pixel grid. */
 .bg-grid {
   background-color: var(--desk);
   background-image:
@@ -239,8 +246,29 @@ body {
   cursor: grabbing;
 }
 
+/* Desk doodle sparkles: two-frame twinkle, each offset by --d. */
+@keyframes twinkle {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.5);
+  }
+}
+
+.twinkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: twinkle 1.6s steps(1) infinite;
+  animation-delay: var(--d, 0s);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pixel-blink {
+
+  .pixel-blink,
+  .twinkle {
     animation: none;
   }
 }

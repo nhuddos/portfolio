@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
-import { MinusIcon, SquareIcon, XIcon, CopyIcon } from "lucide-react";
 import { useDesktop } from "../contexts/DesktopContext";
 import { MenuBar } from "./MenuBar";
+import { WindowGlyph } from "./WindowGlyph";
 import { reducedMotion, shrinkRect, takeZoomOrigin, zoomRects } from "../motion";
 
 export function Window({ win, children, isNarrow, hold = false }) {
@@ -14,6 +14,7 @@ export function Window({ win, children, isNarrow, hold = false }) {
     const drag = useRef(null);
     const isFocused = focusedId === win.id;
     const isMax = win.status === 'maximized' || isNarrow;
+    const control = `grid shrink-0 place-items-center rounded-[3px] border-2 border-ink text-ink active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-[22px] w-[22px]'}`;
 
     /* Opening: zoom rectangles step out from whatever launched the window
        (an icon, a menu item) or from the window's own centre. */
@@ -188,21 +189,17 @@ export function Window({ win, children, isNarrow, hold = false }) {
                 visibility: hold ? 'hidden' : undefined,
                 display: win.status === 'minimized' ? 'none' : 'flex'
             }}
-            className={`absolute flex-col overflow-hidden bevel bg-paper [--bevel-radius:12px] ${isFocused ? 'shadow-pixel-lg' : 'shadow-pixel'}`}
+            className={`absolute flex-col overflow-hidden bevel bg-paper [--bevel-radius:8px] [--bevel-w:3px] ${isFocused ? 'shadow-pixel-lg' : 'shadow-pixel'}`}
         >
-            {/* Title bar: close box left, pinstripes either side of the title
-                (only on the focused window, like classic Mac OS), size boxes right. */}
+            {/* Title bar: chunky bitmap title on the left, a dotted rail, and
+                boxed controls on the right with a tomato close box. The bar is
+                tinted only on the focused window. */}
             <div
                 onPointerDown={onPointerDown}
                 onDoubleClick={handleMaximize}
-                className={`flex shrink-0 items-center gap-2 border-b-2 border-ink bg-paper px-2.5 ${isNarrow ? 'py-1.5' : 'py-2'} ${isMax ? '' : 'titlebar-grab'}`}
+                className={`flex shrink-0 items-center gap-2.5 border-b-[3px] border-ink pl-3 pr-2 transition-colors duration-150 [transition-timing-function:steps(2)] ${isFocused ? 'bg-sky' : 'bg-paper'} ${isNarrow ? 'py-1.5' : 'py-1.5'} ${isMax ? '' : 'titlebar-grab'}`}
             >
-                <button onClick={handleClose} onPointerDown={(e) => e.stopPropagation()} aria-label={`Close ${win.title}`} className={`grid shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink transition-colors active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-6 w-6'} hover:bg-accent ${isFocused ? '' : 'opacity-40'}`}>
-                    <XIcon size={isNarrow ? 18 : 13} strokeWidth={3} />
-                </button>
-
-                <span className={`pinstripe h-[12px] min-w-[12px] flex-1 ${isFocused ? '' : 'invisible'}`} aria-hidden="true" />
-                <span className={`min-w-0 truncate px-1 font-mono text-xl uppercase leading-none max-md:text-[22px] ${isFocused ? 'text-ink' : 'text-ink/45'}`}>
+                <span className={`min-w-0 truncate font-chunky text-[15px] uppercase leading-none max-md:text-[17px] ${isFocused ? 'text-ink' : 'text-ink/45'}`}>
                     {win.appId === 'project' && win.title.includes('\u203A') ?
                         <>
                             <Link
@@ -216,16 +213,19 @@ export function Window({ win, children, isNarrow, hold = false }) {
                         </> :
                         win.title}
                 </span>
-                <span className={`pinstripe h-[12px] min-w-[12px] flex-1 ${isFocused ? '' : 'invisible'}`} aria-hidden="true" />
+                <span className={`rail-dots h-1 min-w-[12px] flex-1 ${isFocused ? '' : 'invisible'}`} aria-hidden="true" />
 
                 <div className={`flex shrink-0 items-center gap-1.5 ${isFocused ? '' : 'opacity-40'}`}>
-                    <button onClick={handleMinimize} onPointerDown={(e) => e.stopPropagation()} aria-label={`Minimize ${win.title}`} className={`grid shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink transition-colors active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-6 w-6'} hover:bg-accent-2`}>
-                        <MinusIcon size={isNarrow ? 18 : 13} strokeWidth={3} />
+                    <button onClick={handleMinimize} onPointerDown={(e) => e.stopPropagation()} aria-label={`Minimize ${win.title}`} className={`${control} bg-paper hover:bg-accent-2`}>
+                        <WindowGlyph name="minimize" size={isNarrow ? 14 : 11} />
                     </button>
                     {!isNarrow &&
-                        <button onClick={handleMaximize} onPointerDown={(e) => e.stopPropagation()} aria-label={win.status === 'maximized' ? `Restore ${win.title}` : `Maximize ${win.title}`} className={`grid shrink-0 place-items-center rounded-[4px] border-2 border-ink bg-paper text-ink transition-colors active:translate-y-px ${isNarrow ? 'h-10 w-10' : 'h-6 w-6'} hover:bg-mint`}>
-                            {win.status === 'maximized' ? <CopyIcon size={12} strokeWidth={3} /> : <SquareIcon size={12} strokeWidth={3} />}
+                        <button onClick={handleMaximize} onPointerDown={(e) => e.stopPropagation()} aria-label={win.status === 'maximized' ? `Restore ${win.title}` : `Maximize ${win.title}`} className={`${control} bg-paper hover:bg-mint`}>
+                            <WindowGlyph name={win.status === 'maximized' ? 'restore' : 'maximize'} />
                         </button>}
+                    <button onClick={handleClose} onPointerDown={(e) => e.stopPropagation()} aria-label={`Close ${win.title}`} className={`${control} ${isFocused ? 'bg-accent text-paper' : 'bg-paper'} hover:bg-accent hover:text-paper`}>
+                        <WindowGlyph name="close" size={isNarrow ? 14 : 11} />
+                    </button>
                 </div>
             </div>
 
