@@ -53,7 +53,7 @@ export const timeline = [
 export const khanhTexts = [
   "hey i'm khanh! i'm a **vietnamese caffeine-driven digital designer** who loves **visual storytelling** and building immersive experiences across web, motion, and print. i'm in my 3rd year of **DEVINE** (digital design and development) at Howest.",
   "i've always been drawn to **art in all its forms**: animation, illustration, photography, music.",
-  "but what pulled me into design was making things that look good and also work well. i love taking an idea and turning it into something people can actually interact with and enjoy. right now i'm looking for a **design internship** starting **february 2027**."
+  "but what pulled me into design was making things that look good and also work well. i love taking an idea and turning it into something people can actually interact with and enjoy. right now i'm looking for a **design internship** starting **february 2027**.",
   "now for the useless info.",
   "im an aries (wild), i do tarot, i read manga, i watch anime.",
   "used to be a mathlete (notice where that took me).",
