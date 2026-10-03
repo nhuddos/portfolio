@@ -55,13 +55,26 @@ const toneClasses = {
   sky: 'bg-sky/30 text-ink'
 };
 
-const typingFor = (text) => Math.min(2200, Math.max(700, text.replace(/\*\*/g, '').length * 14));
+const typingFor = (text) => Math.min(2600, Math.max(900, text.replace(/\*\*/g, '').length * 18));
+
+/* Khanh's chat pacing: a quiet gap after each message before the next one
+   starts "typing", and a long reading break after the serious intro texts
+   (the first SERIOUS_TEXTS of khanhTexts) before the useless info starts. */
+const KHANH_GAP = 1500;
+const SERIOUS_TEXTS = 3;
+const READING_BREAK = 8000;
 
 
 const roomMessages = {
   khanh: [
     { id: 'k-photo', kind: 'photo', src: asset('/images/khanhdo.webp'), alt: 'Khanh Do', typing: 700 },
-    ...khanhTexts.map((text, i) => ({ id: `k-${i}`, kind: 'text', text, typing: typingFor(text) }))
+    ...khanhTexts.map((text, i) => ({
+      id: `k-${i}`,
+      kind: 'text',
+      text,
+      typing: typingFor(text),
+      pause: i === SERIOUS_TEXTS ? READING_BREAK : KHANH_GAP
+    }))
   ],
   tools: toolGroups.map((group) => ({ id: `t-${group.label}`, kind: 'tools', group, typing: 900 })),
   experience: timeline.map((item, i) => ({ id: `e-${i}`, kind: 'experience', item, typing: 1200 }))
@@ -273,7 +286,7 @@ function Conversation({ room, progressRef, onTyping }) {
       return undefined;
     }
 
-    const lead = count === 0 ? 600 : 400;
+    const lead = count === 0 ? 600 : messages[count].pause ?? 400;
     const showTyping = setTimeout(() => setTyping(true), lead);
     const deliver = setTimeout(() => {
       setTyping(false);
