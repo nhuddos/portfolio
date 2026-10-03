@@ -275,6 +275,33 @@ body {
   }
 }
 
+/* While the forcefield has the mouse, the real cursor hides and a drawn
+   stand-in (positioned from JS) takes its place. Sizes and hotspots match
+   ARROW / HAND in src/data/cursorArt.js. */
+.cursor-hijacked,
+.cursor-hijacked * {
+  cursor: none !important;
+}
+
+.fake-cursor {
+  display: none;
+  position: fixed;
+  left: -1px;
+  top: -1px;
+  z-index: 200;
+  width: 24px;
+  height: 38px;
+  pointer-events: none;
+  background: var(--fake-arrow) no-repeat 0 0 / contain;
+}
+
+.fake-cursor[data-hand='true'] {
+  left: -11px;
+  width: 30px;
+  height: 36px;
+  background-image: var(--fake-hand);
+}
+
 /* Desk doodle sparkles: two-frame twinkle, each offset by --d. */
 @keyframes twinkle {
   0%,

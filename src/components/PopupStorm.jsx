@@ -53,7 +53,7 @@ const SCRIPT = [
 const CONFESSION = {
   title: 'README.txt',
   kind: 'info',
-  text: "if you cringe at this portfolio then i have succeeded because this used to be a normal portfolio but my professor told me it said nothing about me so now you're bombarded with this bullcrap. ur welcome dawg o(\u2267\u2207\u2266o) if you were put off by anything, it was him and if you want to hire me then it was my idea all along.",
+  text: "just know this used to be a normal portfolio but the fire nation (valuable feedback) attacked. if u were out cringed by anything, it was my professor and if not, it was all me.",
   buttons: ['OK', 'Hire']
 };
 
